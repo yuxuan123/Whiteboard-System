@@ -1,0 +1,1 @@
+﻿CREATE TABLE tbl_user (    UserId uniqueidentifier NOT NULL PRIMARY KEY,    UserName nvarchar(255) NOT NULL,    PasswordHash varbinary(1024),    PasswordSalt varbinary(1024),    Email varchar(255),    PhoneNo varchar(16),    Role varchar(255));
