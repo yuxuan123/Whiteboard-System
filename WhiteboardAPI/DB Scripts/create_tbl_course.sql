@@ -1,0 +1,1 @@
+﻿CREATE TABLE tbl_course (    CourseId uniqueidentifier NOT NULL PRIMARY KEY,    CourseCode varchar(16),    CourseName nvarchar(255) NOT NULL,    CourseDescription varchar(255),    CreatedBy uniqueidentifier,    CreatedOn datetime);

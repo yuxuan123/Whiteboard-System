@@ -71,8 +71,8 @@ namespace WhiteboardAPI.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("register")]
-        public IActionResult Register([FromBody]UserCreationDto userCreationDto)
+        [HttpPost("createUser")]
+        public IActionResult Register(UserCreationDto userCreationDto)
         {
             if (!ModelState.IsValid)
             {
@@ -92,6 +92,64 @@ namespace WhiteboardAPI.Controllers
             catch (AppException ex)
             {
                 // return error message if there was an exception
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpGet("getUsers")]
+        public IActionResult GetUsers([FromQuery] List<Guid> userIds)
+        {
+            var usersFromRepo = _userRepository.GetUsers(userIds);
+
+            if (usersFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            IEnumerable<UserDto> userDtos = _mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
+
+            Users users = new Users
+            {
+                UserDtos = userDtos
+            };
+
+            users.TotalCount = userDtos.Count();
+
+            return Ok(users);
+        }
+
+        [AllowAnonymous]
+        [HttpPut("{id}")]
+        public IActionResult UpdateUser(Guid id, [FromBody]UserUpdateDto userUpdateDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    // return 422
+                    return new Helpers.UnprocessableEntityObjectResult(ModelState);
+                }
+
+                if (!_userRepository.UserExists(id))
+                {
+                    return NotFound();
+                }
+
+                // map dto to entity and set id
+                var user = _mapper.Map<UserDE>(userUpdateDto);
+
+                _userRepository.UpdateUser(id, user);
+
+                if (!_userRepository.Save())
+                {
+                    throw new AppException("Updating {id} for user failed on save.");
+                }
+
+                return NoContent();
+            }
+            catch (AppException ex)
+            {
                 return BadRequest(new { message = ex.Message });
             }
         }

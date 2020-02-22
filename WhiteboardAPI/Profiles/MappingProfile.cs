@@ -12,7 +12,8 @@ namespace WhiteboardAPI.Profiles
     {
         public MappingProfile()
         {
-            CreateMap<User, UserDto>();
+            CreateMap<UserDE, UserDto>();
+            CreateMap<CourseDto, CourseDE>();
         }
     }
 }

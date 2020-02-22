@@ -15,7 +15,7 @@ namespace WhiteboardAPI.Helpers
     {
         public PropertyMappingService()
         {
-            propertyMappings.Add(new PropertyMapping<UserDto, User>(_userPropertyMapping));
+            propertyMappings.Add(new PropertyMapping<UserDto, UserDE>(_userPropertyMapping));
             //propertyMappings.Add(new PropertyMapping<FeedbackDto, Feedback>(_feedbackPropertyMapping));
             //propertyMappings.Add(new PropertyMapping<CarparkDto, Carpark>(_carparkPropertyMapping));
         }

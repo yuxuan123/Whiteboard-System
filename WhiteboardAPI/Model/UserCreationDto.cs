@@ -30,5 +30,7 @@ namespace WhiteboardAPI.Model
 
         [Required(ErrorMessage = "Role is required")]
         public string Role { get; set; }
+
+        public List<string> CourseIds { get; set; }
     }
 }

@@ -1,0 +1,1 @@
+﻿CREATE TABLE tbl_course_student (    Id uniqueidentifier NOT NULL PRIMARY KEY,    CourseId uniqueidentifier NOT NULL FOREIGN KEY(CourseId) REFERENCES tbl_course(CourseId),    StudentId uniqueidentifier NOT NULL FOREIGN KEY(StudentId) REFERENCES tbl_user(UserId),    isActive bit);

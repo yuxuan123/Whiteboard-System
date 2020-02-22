@@ -10,6 +10,9 @@ namespace WhiteboardAPI.Database
 
         }
 
-        public DbSet<User> tbl_user { get; set; }
+        public DbSet<UserDE> tbl_user { get; set; }
+        public DbSet<CourseDE> tbl_course { get; set; }
+        public DbSet<CourseStaffDE> tbl_course_staff { get; set; }
+        public DbSet<CourseStudentDE> tbl_course_student { get; set; }
     }
 }

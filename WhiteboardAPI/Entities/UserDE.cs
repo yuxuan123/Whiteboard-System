@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WhiteboardAPI.Entities
 {
-    public class User
+    public class UserDE
     {
         [Key]
         public Guid UserId { get; set; }

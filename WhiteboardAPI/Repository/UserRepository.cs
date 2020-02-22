@@ -11,23 +11,23 @@ namespace WhiteboardAPI.Repository
 {
     public interface IUserRepository
     {
-        User Authenticate(string username, string password);
+        UserDE Authenticate(string username, string password);
         //PagedList<User> GetUsers(UserResourceParameters userResourceParameters);
-        User Create(UserCreationDto user);
-        //User GetUser(Guid userId);
+        UserDE Create(UserCreationDto user);
+        IEnumerable<UserDE> GetUsers(List<Guid> userIds);
         //User GetUserByEmail(string Email);
-        //void UpdateUser(Guid userId, User userParam);
+        void UpdateUser(Guid userId, UserDE userParam);
         //void UpdatePassword(User user, string password);
         //void DeleteUser(User user);
-        //bool UserExists(Guid userId);
-        //bool Save();
+        bool UserExists(Guid userId);
+        bool Save();
     }
 
     public class UserRepository : IUserRepository
     {
-        private List<User> _users = new List<User>
+        private List<UserDE> _users = new List<UserDE>
         {
-            new User { UserName = "Ah Mao", Email="ahmao@gmail.com", UserId = Guid.NewGuid(), Role = "Admin" }
+            new UserDE { UserName = "Ah Mao", Email="ahmao@gmail.com", UserId = Guid.NewGuid(), Role = "Admin" }
         };
 
 
@@ -42,7 +42,7 @@ namespace WhiteboardAPI.Repository
             _propertyMappingService = propertyMappingService;
         }
 
-        public User Create(UserCreationDto user)
+        public UserDE Create(UserCreationDto user)
         {
             // validation
             if (string.IsNullOrWhiteSpace(user.Password))
@@ -66,7 +66,7 @@ namespace WhiteboardAPI.Repository
             byte[] passwordHash, passwordSalt;
             CreatePasswordHash(user.Password, out passwordHash, out passwordSalt);
 
-            User newUser = new User
+            UserDE newUser = new UserDE
             {
                 UserId = new Guid(),
                 UserName = user.UserName,
@@ -83,7 +83,7 @@ namespace WhiteboardAPI.Repository
             return newUser;
         }
 
-        public User Authenticate(string username, string password)
+        public UserDE Authenticate(string username, string password)
         {
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
                 return null;
@@ -131,6 +131,37 @@ namespace WhiteboardAPI.Repository
             return true;
         }
 
+        public IEnumerable<UserDE> GetUsers(List<Guid> userIds)
+        {
+            return _context.tbl_user.Where(x => userIds.Contains(x.UserId)).ToList();
+        }
 
+        public bool UserExists(Guid guid)
+        {
+            return _context.tbl_user.Any(x => x.UserId == guid);
+        }
+
+        public void UpdateUser(Guid userId, UserDE userParam)
+        {
+            IEnumerable<UserDE> users = GetUsers(new List<Guid>(new Guid[] { userId }));
+            UserDE user = users.FirstOrDefault();
+
+            if (user == null)
+            {
+                throw new AppException("User not found");
+            }
+
+            // Update user properties
+            user.UserName = string.IsNullOrEmpty(userParam.UserName) ? user.UserName : userParam.UserName;
+            user.Email = string.IsNullOrEmpty(userParam.Email) ? user.Email : userParam.Email;
+            user.PhoneNo = string.IsNullOrEmpty(userParam.PhoneNo) ? user.PhoneNo : userParam.PhoneNo;
+
+            _context.tbl_user.Update(user);
+        }
+
+        public bool Save()
+        {
+            return (_context.SaveChanges() >= 0);
+        }
     }
 }
