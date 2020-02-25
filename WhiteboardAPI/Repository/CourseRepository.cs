@@ -14,9 +14,15 @@ namespace WhiteboardAPI.Repository
     {
         CourseDE CreateCourse(CourseDto courseDto);
         CourseDE UpdateCourse(CourseDto courseDto);
+        IEnumerable<CourseDE> GetAllCourses();
         IEnumerable<CourseDE> GetCourses(IEnumerable<Guid> courseIds);
+        IEnumerable<CourseDE> GetCourseByUser(Guid userId);
         IEnumerable<CourseStudentDE> AddCourseStudent(List<CourseStudentDto> courseStudentDto);
+        IEnumerable<Guid> GetCourseStudent(Guid courseId);
+        void RemoveCourseStudent(Guid courseId, Guid studentId);
         IEnumerable<CourseStaffDE> AddCourseStaff(List<CourseStaffDto> courseStaffDto);
+        IEnumerable<Guid> GetCourseStaff(Guid courseId);
+        void RemoveCourseStaff(Guid courseId, Guid staffId);
         public bool Save();
     }
 
@@ -80,9 +86,24 @@ namespace WhiteboardAPI.Repository
             return course;
         }
 
+        public IEnumerable<CourseDE> GetAllCourses()
+        {
+            return _context.tbl_course;
+        }
+
         public IEnumerable<CourseDE> GetCourses(IEnumerable<Guid> courseIds)
         {
             return _context.tbl_course.Where(x => courseIds.Contains(x.CourseId));
+        }
+
+        public IEnumerable<CourseDE> GetCourseByUser(Guid userId)
+        {
+            var courses = _context.tbl_course_student.Where(x => x.StudentId == userId && x.IsActive).Select(x => x.CourseId);
+
+            if (courses == null)
+                courses = _context.tbl_course_staff.Where(x => x.StaffId == userId && x.IsActive).Select(x => x.CourseId);
+
+            return _context.tbl_course.Where(x => courses.Contains(x.CourseId));
         }
 
         public IEnumerable<CourseStudentDE> AddCourseStudent(List<CourseStudentDto> courseStudentDto)
@@ -118,6 +139,22 @@ namespace WhiteboardAPI.Repository
             return courseStudents;
         }
 
+        public IEnumerable<Guid> GetCourseStudent(Guid courseId)
+        {
+            return _context.tbl_course_staff.Where(x => x.CourseId == courseId && x.IsActive).Select(x => x.StaffId);
+        }
+
+        public void RemoveCourseStudent(Guid courseId, Guid studentId)
+        {
+            var student = _context.tbl_course_student.Where(x => x.CourseId == courseId && x.StudentId == studentId && x.IsActive).FirstOrDefault();
+
+            if (student != null)
+            {
+                student.IsActive = false;
+                _context.tbl_course_student.Update(student);
+            }
+        }
+
         public IEnumerable<CourseStaffDE> AddCourseStaff(List<CourseStaffDto> courseStaffDto)
         {
             IList<CourseStaffDE> courseStaff = new List<CourseStaffDE>();
@@ -149,6 +186,22 @@ namespace WhiteboardAPI.Repository
             _context.SaveChanges();
 
             return courseStaff;
+        }
+
+        public IEnumerable<Guid> GetCourseStaff(Guid courseId)
+        {
+            return _context.tbl_course_student.Where(x => x.CourseId == courseId && x.IsActive).Select(x => x.StudentId);
+        }
+
+        public void RemoveCourseStaff(Guid courseId, Guid staffId)
+        {
+            var staff = _context.tbl_course_staff.Where(x => x.CourseId == courseId && x.StaffId == staffId && x.IsActive).FirstOrDefault();
+
+            if (staff != null)
+            {
+                staff.IsActive = false;
+                _context.tbl_course_staff.Update(staff);
+            }
         }
 
         public bool CourseExists(Guid guid)

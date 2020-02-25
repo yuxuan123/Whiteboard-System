@@ -19,5 +19,6 @@ namespace WhiteboardAPI.Model
         public string PhoneNo { get; set; }
         public string Role { get; set; }
         public string Token { get; set; }
+        public List<Guid> CourseIds { get; set; }
     }
 }

@@ -18,6 +18,6 @@ namespace WhiteboardAPI.Model
         [Phone]
         public string PhoneNo { get; set; }
 
-        public List<string> CourseIds { get; set; }
+        public List<Guid> CourseIds { get; set; }
     }
 }
