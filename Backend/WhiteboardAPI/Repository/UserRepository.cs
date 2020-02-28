@@ -15,6 +15,7 @@ namespace WhiteboardAPI.Repository
         //PagedList<User> GetUsers(UserResourceParameters userResourceParameters);
         UserDE Create(UserCreationDto user);
         IEnumerable<UserDE> GetUsers(List<Guid> userIds);
+        UserDE GetUser(Guid userId);
         //User GetUserByEmail(string Email);
         void UpdateUser(Guid userId, UserDE userParam);
         //void UpdatePassword(User user, string password);
@@ -134,6 +135,11 @@ namespace WhiteboardAPI.Repository
         public IEnumerable<UserDE> GetUsers(List<Guid> userIds)
         {
             return _context.tbl_user.Where(x => userIds.Contains(x.UserId)).ToList();
+        }
+
+        public UserDE GetUser(Guid userId)
+        {
+            return _context.tbl_user.Where(x => x.UserId == userId).FirstOrDefault();
         }
 
         public bool UserExists(Guid guid)

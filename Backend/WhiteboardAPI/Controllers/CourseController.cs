@@ -72,12 +72,50 @@ namespace WhiteboardAPI.Controllers
                     throw new AppException("Updating course failed on save.");
                 }
 
-                return NoContent();
+                return Ok();
             }
             catch (AppException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
+        }
+
+        [AllowAnonymous]
+        [HttpDelete("deleteCourse/{courseId}")]
+        public IActionResult DeleteCourse(Guid courseId)
+        {
+            try
+            {
+                _courseRepository.DeleteCourse(courseId);
+
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpGet("getAllCourses")]
+        public IActionResult GetAllCourses()
+        {
+            var coursesFromRepo = _courseRepository.GetAllCourses();
+
+            if (coursesFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            IEnumerable<CourseDto> courseDtos = _mapper.Map<IEnumerable<CourseDto>>(coursesFromRepo);
+            foreach (CourseDto c in courseDtos)
+            {
+                c.Students = _courseRepository.GetCourseStudent(c.CourseId);
+                c.Staff = _courseRepository.GetCourseStaff(c.CourseId);
+                //c.Content
+            }
+
+            return Ok(courseDtos);
         }
 
         [AllowAnonymous]
@@ -92,6 +130,34 @@ namespace WhiteboardAPI.Controllers
             }
 
             IEnumerable<CourseDto> courseDtos = _mapper.Map<IEnumerable<CourseDto>>(coursesFromRepo);
+            foreach (CourseDto c in courseDtos)
+            {
+                c.Students = _courseRepository.GetCourseStudent(c.CourseId);
+                c.Staff = _courseRepository.GetCourseStaff(c.CourseId);
+                //c.Content
+            }
+
+            return Ok(courseDtos);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("getCourseByUser/{userId}")]
+        public IActionResult GetCourseByUser(Guid userId)
+        {
+            var coursesFromRepo = _courseRepository.GetCourseByUser(userId);
+
+            if (coursesFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            IEnumerable<CourseDto> courseDtos = _mapper.Map<IEnumerable<CourseDto>>(coursesFromRepo);
+            foreach (CourseDto c in courseDtos)
+            {
+                c.Students = _courseRepository.GetCourseStudent(c.CourseId);
+                c.Staff = _courseRepository.GetCourseStaff(c.CourseId);
+                //c.Content
+            }
 
             return Ok(courseDtos);
         }
@@ -123,6 +189,33 @@ namespace WhiteboardAPI.Controllers
         }
 
         [AllowAnonymous]
+        [HttpPut("removeCourseStudent/{courseId}/{studentId}")]
+        public IActionResult RemoveCourseStudent(Guid courseId, Guid studentId)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    // return 422
+                    return new Helpers.UnprocessableEntityObjectResult(ModelState);
+                }
+
+                _courseRepository.RemoveCourseStudent(courseId, studentId);
+
+                if (!_courseRepository.Save())
+                {
+                    throw new AppException("Removing {stuentId} from course failed on save.");
+                }
+
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [AllowAnonymous]
         [HttpPost("addCourseStaff")]
         public IActionResult AddCourseStaff([FromBody]List<CourseStaffDto> courseStaffDto)
         {
@@ -144,6 +237,33 @@ namespace WhiteboardAPI.Controllers
             catch (AppException ex)
             {
                 // return error message if there was an exception
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpPut("removeCourseStaff/{courseId}/{staffId}")]
+        public IActionResult RemoveCourseStaff(Guid courseId, Guid staffId)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    // return 422
+                    return new Helpers.UnprocessableEntityObjectResult(ModelState);
+                }
+
+                _courseRepository.RemoveCourseStaff(courseId, staffId);
+
+                if (!_courseRepository.Save())
+                {
+                    throw new AppException("Removing {stuentId} from course failed on save.");
+                }
+
+                return Ok();
+            }
+            catch (AppException ex)
+            {
                 return BadRequest(new { message = ex.Message });
             }
         }

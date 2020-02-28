@@ -14,9 +14,16 @@ namespace WhiteboardAPI.Repository
     {
         CourseDE CreateCourse(CourseDto courseDto);
         CourseDE UpdateCourse(CourseDto courseDto);
+        void DeleteCourse(Guid courseId);
+        IEnumerable<CourseDE> GetAllCourses();
         IEnumerable<CourseDE> GetCourses(IEnumerable<Guid> courseIds);
+        IEnumerable<CourseDE> GetCourseByUser(Guid userId);
         IEnumerable<CourseStudentDE> AddCourseStudent(List<CourseStudentDto> courseStudentDto);
+        IEnumerable<Guid> GetCourseStudent(Guid courseId);
+        void RemoveCourseStudent(Guid courseId, Guid studentId);
         IEnumerable<CourseStaffDE> AddCourseStaff(List<CourseStaffDto> courseStaffDto);
+        IEnumerable<Guid> GetCourseStaff(Guid courseId);
+        void RemoveCourseStaff(Guid courseId, Guid staffId);
         public bool Save();
     }
 
@@ -65,7 +72,7 @@ namespace WhiteboardAPI.Repository
 
         public CourseDE UpdateCourse(CourseDto courseDto)
         {
-            CourseDE course = GetCourses(new List<Guid>(new Guid[] { courseDto.CourseId })).FirstOrDefault();
+            CourseDE course = _context.tbl_course.Where(x => x.CourseId == courseDto.CourseId).FirstOrDefault();
 
             if (course == null)
                 throw new AppException("CourseId is invalid");
@@ -80,17 +87,45 @@ namespace WhiteboardAPI.Repository
             return course;
         }
 
+        public void DeleteCourse(Guid courseId)
+        {
+            CourseDE course = _context.tbl_course.Where(x => x.CourseId == courseId).FirstOrDefault();
+
+            if (course == null)
+                throw new AppException("CourseId does not exist");
+
+            _context.tbl_course.Remove(course);
+            _context.SaveChanges();
+        }
+
+        public IEnumerable<CourseDE> GetAllCourses()
+        {
+            return _context.tbl_course;
+        }
+
         public IEnumerable<CourseDE> GetCourses(IEnumerable<Guid> courseIds)
         {
             return _context.tbl_course.Where(x => courseIds.Contains(x.CourseId));
         }
 
+        public IEnumerable<CourseDE> GetCourseByUser(Guid userId)
+        {
+            var courses = _context.tbl_course_student.Where(x => x.StudentId == userId && x.IsActive).Select(x => x.CourseId);
+
+            if (courses == null)
+                courses = _context.tbl_course_staff.Where(x => x.StaffId == userId && x.IsActive).Select(x => x.CourseId);
+
+            return _context.tbl_course.Where(x => courses.Contains(x.CourseId));
+        }
+
         public IEnumerable<CourseStudentDE> AddCourseStudent(List<CourseStudentDto> courseStudentDto)
         {
             IList<CourseStudentDE> courseStudents = new List<CourseStudentDE>();
+
             foreach (CourseStudentDto c in courseStudentDto)
             {
-                if (!_userRepository.UserExists(c.StudentId))
+                UserDE user = _userRepository.GetUser(c.StudentId);
+                if (user == null || !user.Role.Equals("student", StringComparison.OrdinalIgnoreCase))
                     throw new AppException("Student " + c.StudentId + " does not exist");
 
                 if (!CourseExists(c.CourseId))
@@ -118,12 +153,29 @@ namespace WhiteboardAPI.Repository
             return courseStudents;
         }
 
+        public IEnumerable<Guid> GetCourseStudent(Guid courseId)
+        {
+            return _context.tbl_course_staff.Where(x => x.CourseId == courseId && x.IsActive).Select(x => x.StaffId);
+        }
+
+        public void RemoveCourseStudent(Guid courseId, Guid studentId)
+        {
+            var student = _context.tbl_course_student.Where(x => x.CourseId == courseId && x.StudentId == studentId && x.IsActive).FirstOrDefault();
+
+            if (student != null)
+            {
+                student.IsActive = false;
+                _context.tbl_course_student.Update(student);
+            }
+        }
+
         public IEnumerable<CourseStaffDE> AddCourseStaff(List<CourseStaffDto> courseStaffDto)
         {
             IList<CourseStaffDE> courseStaff = new List<CourseStaffDE>();
             foreach (CourseStaffDto c in courseStaffDto)
             {
-                if (!_userRepository.UserExists(c.StaffId))
+                UserDE user = _userRepository.GetUser(c.StaffId);
+                if (user == null || !user.Role.Equals("lecturer", StringComparison.OrdinalIgnoreCase))
                     throw new AppException("Staff " + c.StaffId + " does not exist");
 
                 if (!CourseExists(c.CourseId))
@@ -149,6 +201,22 @@ namespace WhiteboardAPI.Repository
             _context.SaveChanges();
 
             return courseStaff;
+        }
+
+        public IEnumerable<Guid> GetCourseStaff(Guid courseId)
+        {
+            return _context.tbl_course_student.Where(x => x.CourseId == courseId && x.IsActive).Select(x => x.StudentId);
+        }
+
+        public void RemoveCourseStaff(Guid courseId, Guid staffId)
+        {
+            var staff = _context.tbl_course_staff.Where(x => x.CourseId == courseId && x.StaffId == staffId && x.IsActive).FirstOrDefault();
+
+            if (staff != null)
+            {
+                staff.IsActive = false;
+                _context.tbl_course_staff.Update(staff);
+            }
         }
 
         public bool CourseExists(Guid guid)
