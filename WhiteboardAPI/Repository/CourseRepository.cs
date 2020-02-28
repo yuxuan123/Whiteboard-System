@@ -14,6 +14,7 @@ namespace WhiteboardAPI.Repository
     {
         CourseDE CreateCourse(CourseDto courseDto);
         CourseDE UpdateCourse(CourseDto courseDto);
+        void DeleteCourse(Guid courseId);
         IEnumerable<CourseDE> GetAllCourses();
         IEnumerable<CourseDE> GetCourses(IEnumerable<Guid> courseIds);
         IEnumerable<CourseDE> GetCourseByUser(Guid userId);
@@ -71,7 +72,7 @@ namespace WhiteboardAPI.Repository
 
         public CourseDE UpdateCourse(CourseDto courseDto)
         {
-            CourseDE course = GetCourses(new List<Guid>(new Guid[] { courseDto.CourseId })).FirstOrDefault();
+            CourseDE course = _context.tbl_course.Where(x => x.CourseId == courseDto.CourseId).FirstOrDefault();
 
             if (course == null)
                 throw new AppException("CourseId is invalid");
@@ -84,6 +85,17 @@ namespace WhiteboardAPI.Repository
             _context.SaveChanges();
 
             return course;
+        }
+
+        public void DeleteCourse(Guid courseId)
+        {
+            CourseDE course = _context.tbl_course.Where(x => x.CourseId == courseId).FirstOrDefault();
+
+            if (course == null)
+                throw new AppException("CourseId does not exist");
+
+            _context.tbl_course.Remove(course);
+            _context.SaveChanges();
         }
 
         public IEnumerable<CourseDE> GetAllCourses()
@@ -109,9 +121,11 @@ namespace WhiteboardAPI.Repository
         public IEnumerable<CourseStudentDE> AddCourseStudent(List<CourseStudentDto> courseStudentDto)
         {
             IList<CourseStudentDE> courseStudents = new List<CourseStudentDE>();
+
             foreach (CourseStudentDto c in courseStudentDto)
             {
-                if (!_userRepository.UserExists(c.StudentId))
+                UserDE user = _userRepository.GetUser(c.StudentId);
+                if (user == null || !user.Role.Equals("student", StringComparison.OrdinalIgnoreCase))
                     throw new AppException("Student " + c.StudentId + " does not exist");
 
                 if (!CourseExists(c.CourseId))
@@ -160,7 +174,8 @@ namespace WhiteboardAPI.Repository
             IList<CourseStaffDE> courseStaff = new List<CourseStaffDE>();
             foreach (CourseStaffDto c in courseStaffDto)
             {
-                if (!_userRepository.UserExists(c.StaffId))
+                UserDE user = _userRepository.GetUser(c.StaffId);
+                if (user == null || !user.Role.Equals("lecturer", StringComparison.OrdinalIgnoreCase))
                     throw new AppException("Staff " + c.StaffId + " does not exist");
 
                 if (!CourseExists(c.CourseId))

@@ -72,7 +72,23 @@ namespace WhiteboardAPI.Controllers
                     throw new AppException("Updating course failed on save.");
                 }
 
-                return NoContent();
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpDelete("deleteCourse/{courseId}")]
+        public IActionResult DeleteCourse(Guid courseId)
+        {
+            try
+            {
+                _courseRepository.DeleteCourse(courseId);
+
+                return Ok();
             }
             catch (AppException ex)
             {
@@ -125,7 +141,7 @@ namespace WhiteboardAPI.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("getCourseByUser")]
+        [HttpGet("getCourseByUser/{userId}")]
         public IActionResult GetCourseByUser(Guid userId)
         {
             var coursesFromRepo = _courseRepository.GetCourseByUser(userId);
@@ -173,7 +189,7 @@ namespace WhiteboardAPI.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPut("{courseId}/{studentId}")]
+        [HttpPut("removeCourseStudent/{courseId}/{studentId}")]
         public IActionResult RemoveCourseStudent(Guid courseId, Guid studentId)
         {
             try
@@ -191,7 +207,7 @@ namespace WhiteboardAPI.Controllers
                     throw new AppException("Removing {stuentId} from course failed on save.");
                 }
 
-                return NoContent();
+                return Ok();
             }
             catch (AppException ex)
             {
@@ -226,7 +242,7 @@ namespace WhiteboardAPI.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPut("{courseId}/{staffId}")]
+        [HttpPut("removeCourseStaff/{courseId}/{staffId}")]
         public IActionResult RemoveCourseStaff(Guid courseId, Guid staffId)
         {
             try
@@ -244,7 +260,7 @@ namespace WhiteboardAPI.Controllers
                     throw new AppException("Removing {stuentId} from course failed on save.");
                 }
 
-                return NoContent();
+                return Ok();
             }
             catch (AppException ex)
             {
