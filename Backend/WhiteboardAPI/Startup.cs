@@ -77,6 +77,7 @@ namespace WhiteboardAPI
             });
 
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IContentRepository, ContentRepository>();
             services.AddScoped<ICourseRepository, CourseRepository>();
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();

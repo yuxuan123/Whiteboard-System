@@ -24,6 +24,7 @@ namespace WhiteboardAPI.Repository
         IEnumerable<CourseStaffDE> AddCourseStaff(List<CourseStaffDto> courseStaffDto);
         IEnumerable<Guid> GetCourseStaff(Guid courseId);
         void RemoveCourseStaff(Guid courseId, Guid staffId);
+        bool CourseExists(Guid courseId);
         public bool Save();
     }
 
