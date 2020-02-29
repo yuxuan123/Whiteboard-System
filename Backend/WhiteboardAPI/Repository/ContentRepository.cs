@@ -21,24 +21,39 @@ namespace WhiteboardAPI.Repository
     public class ContentRepository : IContentRepository
     {
         private WhiteboardContext _context;
-        private IContentRepository _contentRepository;
+        private ICourseRepository _courseRepository;
+        private IUserRepository _userRepository;
         private readonly IMapper _mapper;
 
-        public ContentRepository(WhiteboardContext context, IContentRepository contentRepository, IMapper mapper)
+        public ContentRepository(WhiteboardContext context, IMapper mapper, ICourseRepository courseRepository, IUserRepository userRepository)
         {
             _context = context;
-            _contentRepository = contentRepository;
             _mapper = mapper;
+            _courseRepository = courseRepository;
+            _userRepository = userRepository;
         }
 
         public ContentDE AddContent(ContentDto contentDto)
         {
-            ContentDE course = _mapper.Map<ContentDE>(contentDto);
+            ContentDE content = _mapper.Map<ContentDE>(contentDto);
 
-            _context.tbl_content.Add(course);
+            if (!_courseRepository.CourseExists(contentDto.CourseId))
+                throw new AppException("CourseId does not exist");
+
+            UserDE user = _userRepository.GetUser(contentDto.CreatedBy);
+            if (user == null || !user.Role.Equals("lecturer", StringComparison.OrdinalIgnoreCase))
+                throw new AppException("Staff " + contentDto.CreatedBy + " does not exist");
+
+            if (!String.IsNullOrEmpty(contentDto.FileName) && String.IsNullOrEmpty(contentDto.Url))
+                throw new AppException("Url is empty for " + contentDto.FileName);
+
+            content.ContentId = new Guid();
+            content.CreatedOn = DateTime.Now;
+
+            _context.tbl_content.Add(content);
             _context.SaveChanges();
 
-            return course;
+            return content;
         }
 
         public IEnumerable<ContentDE> GetContent(Guid courseId)
@@ -48,9 +63,30 @@ namespace WhiteboardAPI.Repository
 
         public void UpdateContent(ContentDto contentDto)
         {
-            ContentDE course = _mapper.Map<ContentDE>(contentDto);
+            ContentDE content = _context.tbl_content.Where(x => x.ContentId == contentDto.ContentId).FirstOrDefault();
 
-            _context.tbl_content.Update(course);
+            if (content == null)
+                throw new AppException("ContentId does not exist");
+
+            if (!String.IsNullOrEmpty(contentDto.FileName) && String.IsNullOrEmpty(contentDto.Url))
+                throw new AppException("Url is empty for " + contentDto.FileName);
+
+            if (contentDto.Datetime > DateTime.MinValue)
+                content.Datetime = contentDto.Datetime;
+
+            if (!String.IsNullOrEmpty(contentDto.Title))
+                content.Title = contentDto.Title;
+
+            if (!String.IsNullOrEmpty(contentDto.Description))
+                content.Description = contentDto.Description;
+
+            if(!String.IsNullOrEmpty(contentDto.FileName))
+                content.FileName = contentDto.FileName;
+
+            if(!String.IsNullOrEmpty(contentDto.Url))
+                content.url = contentDto.Url;
+
+            _context.tbl_content.Update(content);
         }
 
         public void DeleteContent(Guid contentId)

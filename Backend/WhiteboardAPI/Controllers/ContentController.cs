@@ -24,7 +24,7 @@ namespace WhiteboardAPI.Controllers
 
         [AllowAnonymous]
         [HttpPost("createContent")]
-        public IActionResult AddContent(ContentDto contentDto)
+        public IActionResult AddContent([FromBody] ContentDto contentDto)
         {
             if (!ModelState.IsValid)
             {

@@ -18,7 +18,7 @@ namespace WhiteboardAPI.Model
         public string Description { get; set; }
         public DateTime Datetime { get; set; }
         public string FileName { get; set; }
-        public string url { get; set; }
+        public string Url { get; set; }
         public DateTime CreatedOn { get; set; }
         public Guid CreatedBy { get; set; }
     }
