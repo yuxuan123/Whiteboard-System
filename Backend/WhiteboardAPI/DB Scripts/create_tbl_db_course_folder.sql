@@ -1,0 +1,1 @@
+﻿CREATE TABLE tbl_db_course_folder (    CourseFolderId uniqueidentifier NOT NULL PRIMARY KEY,    CourseId uniqueidentifier NOT NULL FOREIGN KEY(CourseId) REFERENCES tbl_course(CourseId),    Name varchar(255));

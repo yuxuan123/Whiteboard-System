@@ -15,5 +15,9 @@ namespace WhiteboardAPI.Database
         public DbSet<CourseStaffDE> tbl_course_staff { get; set; }
         public DbSet<CourseStudentDE> tbl_course_student { get; set; }
         public DbSet<ContentDE> tbl_content { get; set; }
+        public DbSet<PostDE> tbl_db_post { get; set; }
+        public DbSet<ReplyDE> tbl_db_reply { get; set; }
+        public DbSet<CourseFolderDE> tbl_db_course_folder { get; set; }
+        public DbSet<PostFolderDE> tbl_db_post_folder { get; set; }
     }
 }
