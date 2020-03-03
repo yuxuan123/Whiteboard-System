@@ -45,8 +45,14 @@ namespace WhiteboardAPI.Repository
         {
             PostDE post = _mapper.Map<PostDE>(postDto);
 
+            if (!_userRepository.UserExists(postDto.CreatedBy))
+                throw new AppException("UserId " + postDto.CreatedBy + " does not exist");
+
             post.PostId = new Guid();
             post.CreatedOn = DateTime.Now;
+
+            if (postDto.CourseFolderId.Count > 0)
+                CreatePostFolder(postDto.PostId, postDto.CourseFolderId);
 
             _context.tbl_db_post.Add(post);
             _context.SaveChanges();
@@ -59,6 +65,12 @@ namespace WhiteboardAPI.Repository
 
         public ReplyDE CreateReply(ReplyDto replyDto)
         {
+            if (!PostExists(replyDto.PostId))
+                throw new AppException("PostId " + replyDto.PostId + " does not exist");
+
+            if (!_userRepository.UserExists(replyDto.CreatedBy))
+                throw new AppException("UserId " + replyDto.CreatedBy + " does not exist");
+
             ReplyDE reply = _mapper.Map<ReplyDE>(replyDto);
 
             reply.ReplyId = new Guid();
@@ -72,6 +84,9 @@ namespace WhiteboardAPI.Repository
 
         public CourseFolderDE CreateCourseFolder(CourseFolderDto courseFolderDto)
         {
+            if (!_courseRepository.CourseExists(courseFolderDto.CourseId))
+                throw new AppException("CourseId " + courseFolderDto.CourseId + "does not exist");
+
             CourseFolderDE courseFolder = _mapper.Map<CourseFolderDE>(courseFolderDto);
 
             courseFolder.CourseFolderId = new Guid();
@@ -86,13 +101,15 @@ namespace WhiteboardAPI.Repository
         {
             foreach (Guid i in courseFolderId)
             {
+                if (!CourseFolderExists(i))
+                    throw new AppException("CourseFolderId " + i + " does not exist");
                 PostFolderDE postFolder = new PostFolderDE();
                 postFolder.PostFolderId = new Guid();
                 postFolder.PostId = postId;
                 postFolder.CourseFolderId = i;
                 _context.tbl_db_post_folder.Add(postFolder);
             }
-            _context.SaveChanges();
+            _context.SaveChangesAsync().Wait();
 
         }
 
@@ -114,6 +131,16 @@ namespace WhiteboardAPI.Repository
         public IEnumerable<PostFolderDE> GetPostFolders(Guid postId)
         {
             return _context.tbl_db_post_folder.Where(x => x.PostId == postId);
+        }
+
+        public bool PostExists(Guid postId)
+        {
+            return _context.tbl_db_post.Any(x => x.PostId == postId);
+        }
+
+        public bool CourseFolderExists(Guid courseFolderId)
+        {
+            return _context.tbl_db_course_folder.Any(x => x.CourseFolderId == courseFolderId);
         }
 
         public void DeletePost(Guid postId)

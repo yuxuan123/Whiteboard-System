@@ -13,14 +13,16 @@ namespace WhiteboardAPI.Controllers
     public class CourseController : Controller
     {
         private ICourseRepository _courseRepository;
+        private IDiscussionBoardRepository _discussionBoardRepository;
         private readonly IMapper _mapper;
         private readonly AppSettings _appSettings;
         private readonly IEmailSender _emailSender;
         private readonly IUrlHelper _urlHelper;
 
-        public CourseController(ICourseRepository courseRepository, IMapper mapper, IUrlHelper urlHelper, IOptions<AppSettings> appSettings, IEmailSender emailSender)
+        public CourseController(ICourseRepository courseRepository, IDiscussionBoardRepository discussionBoardRepository, IMapper mapper, IUrlHelper urlHelper, IOptions<AppSettings> appSettings, IEmailSender emailSender)
         {
             _courseRepository = courseRepository;
+            _discussionBoardRepository = discussionBoardRepository;
             _mapper = mapper;
             _appSettings = appSettings.Value;
             _emailSender = emailSender;
@@ -112,6 +114,7 @@ namespace WhiteboardAPI.Controllers
             {
                 c.Students = _courseRepository.GetCourseStudent(c.CourseId);
                 c.Staff = _courseRepository.GetCourseStaff(c.CourseId);
+                c.CourseFolders = _mapper.Map<IEnumerable<CourseFolderDto>>(_discussionBoardRepository.GetCourseFolders(c.CourseId));
                 //c.Content
             }
 

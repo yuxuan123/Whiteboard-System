@@ -12,6 +12,7 @@ namespace WhiteboardAPI.Model
         public IEnumerable<Guid> Staff { get; set; }
         public IEnumerable<Guid> Students { get; set; }
         public IEnumerable<string> Contents { get; set; }
+        public IEnumerable<CourseFolderDto> CourseFolders { get; set; }
         public Guid CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
     }
