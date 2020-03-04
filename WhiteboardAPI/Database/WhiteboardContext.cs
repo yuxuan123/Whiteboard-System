@@ -19,5 +19,6 @@ namespace WhiteboardAPI.Database
         public DbSet<ReplyDE> tbl_db_reply { get; set; }
         public DbSet<CourseFolderDE> tbl_db_course_folder { get; set; }
         public DbSet<PostFolderDE> tbl_db_post_folder { get; set; }
+        public DbSet<ChatDE> tbl_chat { get; set; }
     }
 }
