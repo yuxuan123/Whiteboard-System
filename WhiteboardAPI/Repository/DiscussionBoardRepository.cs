@@ -15,7 +15,8 @@ namespace WhiteboardAPI.Repository
         ReplyDE CreateReply(ReplyDto replyDto);
         CourseFolderDE CreateCourseFolder(CourseFolderDto courseFolderDto);
         void CreatePostFolder(Guid postId, List<Guid> courseFolderId);
-        IEnumerable<PostDE> GetPosts(Guid courseId);
+        IEnumerable<PostDE> GetPostsByUser(Guid userId);
+        IEnumerable<PostDE> GetPostsByCourse(Guid courseId);
         IEnumerable<ReplyDE> GetReplies(Guid PostId);
         IEnumerable<CourseFolderDE> GetCourseFolders(Guid CourseId); //get course dto
         IEnumerable<PostFolderDE> GetPostFolders(Guid postId);
@@ -113,7 +114,13 @@ namespace WhiteboardAPI.Repository
 
         }
 
-        public IEnumerable<PostDE> GetPosts(Guid courseId)
+        public IEnumerable<PostDE> GetPostsByUser(Guid userId)
+        {
+            var courses = _courseRepository.GetCourseByUser(userId).Select(x => x.CourseId).ToList();
+            return _context.tbl_db_post.Where(x => courses.Contains(x.CourseId));
+        }
+
+        public IEnumerable<PostDE> GetPostsByCourse(Guid courseId)
         {
             return _context.tbl_db_post.Where(x => x.CourseId == courseId);
         }
