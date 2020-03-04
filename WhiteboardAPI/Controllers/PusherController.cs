@@ -6,7 +6,7 @@ namespace WhiteboardAPI.Controllers
 {
     public class PusherController : Controller
     {
-        [HttpPost]
+        [HttpPost("pusher")]
         public async Task<ActionResult> HelloWorld()
         {
             var options = new PusherOptions
