@@ -1,0 +1,1 @@
+﻿CREATE TABLE tbl_chat (    ChatId uniqueidentifier NOT NULL PRIMARY KEY,    LectureId uniqueidentifier,    UserName nvarchar(255),    Message nvarchar(255),    DateTime datetime);

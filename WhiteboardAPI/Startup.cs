@@ -80,6 +80,7 @@ namespace WhiteboardAPI
             services.AddScoped<IContentRepository, ContentRepository>();
             services.AddScoped<ICourseRepository, CourseRepository>();
             services.AddScoped<IDiscussionBoardRepository, DiscussionBoardRepository>();
+            services.AddScoped<IChatRepository, ChatRepository>();
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddScoped<IUrlHelper, UrlHelper>(implementationFactory =>
