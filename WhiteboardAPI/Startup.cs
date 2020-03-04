@@ -44,6 +44,13 @@ namespace WhiteboardAPI
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Whiteboard API", Version = "v1" });
             });
 
+            //add cors
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigin",
+                    builder => builder.WithOrigins("http://localhost:8080"));
+            });
+
             // configure strongly typed settings objects
 
             var appSettingsSection = Configuration.GetSection("AppSettings");
