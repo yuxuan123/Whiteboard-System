@@ -51,9 +51,9 @@ namespace WhiteboardAPI.Controllers
 
         [AllowAnonymous]
         [HttpGet("getPost/{userId}")]
-        public IActionResult GetPost(Guid userId)
+        public IActionResult GetPost(Guid userId, [FromQuery]Guid courseId)
         {
-            var postsFromRepo = _discussionBoardRepository.GetPostsByUser(userId);
+            var postsFromRepo = _discussionBoardRepository.GetPostsByUser(userId, courseId);
 
             if (postsFromRepo == null)
             {
