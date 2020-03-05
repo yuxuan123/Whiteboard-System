@@ -7,6 +7,7 @@ namespace WhiteboardAPI.Model
         public Guid PostId { get; set; }
         public string Description { get; set; }
         public string Role { get; set; }
+        public string UserName { get; set; }
         public DateTime CreatedOn { get; set; }
         public Guid CreatedBy { get; set; }
     }
