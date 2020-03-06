@@ -51,9 +51,9 @@ namespace WhiteboardAPI.Controllers
 
         [AllowAnonymous]
         [HttpGet("getPost/{userId}")]
-        public IActionResult GetPost(Guid userId)
+        public IActionResult GetPost(Guid userId, [FromQuery]Guid courseId, [FromQuery]string keyword)
         {
-            var postsFromRepo = _discussionBoardRepository.GetPostsByUser(userId);
+            var postsFromRepo = _discussionBoardRepository.GetPostsByUser(userId, courseId, keyword);
 
             if (postsFromRepo == null)
             {
@@ -64,6 +64,9 @@ namespace WhiteboardAPI.Controllers
 
             foreach (PostDto p in postDtos)
             {
+                var postUser = _userRepository.GetUser(p.CreatedBy);
+                p.UserName = postUser.UserName;
+
                 p.CourseFolderId = _discussionBoardRepository.GetPostFolders(p.PostId).Select(x => x.CourseFolderId).ToList();
                 var replies = _discussionBoardRepository.GetReplies(p.PostId);
                 if (replies != null)
@@ -133,7 +136,14 @@ namespace WhiteboardAPI.Controllers
                 return NotFound();
             }
 
-            var replyDtos = _mapper.Map<IEnumerable<PostDto>>(repliesFromRepo);
+            var replyDtos = _mapper.Map<IEnumerable<ReplyDto>>(repliesFromRepo);
+
+            foreach (ReplyDto r in replyDtos)
+            {
+                var user = _userRepository.GetUser(r.CreatedBy);
+
+                r.UserName = user.UserName;
+            }
 
             return Ok(replyDtos);
         }

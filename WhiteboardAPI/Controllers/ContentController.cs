@@ -49,10 +49,10 @@ namespace WhiteboardAPI.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("getContent/{courseId}")]
-        public IActionResult GetContent(Guid courseId)
+        [HttpGet("getContent/{userId}")]
+        public IActionResult GetContent(Guid userId)
         {
-            var contentsFromRepo = _contentRepository.GetContent(courseId);
+            var contentsFromRepo = _contentRepository.GetContent(userId);
 
             if (contentsFromRepo == null)
             {
