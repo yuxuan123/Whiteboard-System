@@ -131,6 +131,60 @@ namespace WhiteboardAPI.Controllers
         }
 
         [AllowAnonymous]
+        [HttpPost("updatePost")]
+        public IActionResult UpdatePost([FromBody] PostDto postDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    // return 422
+                    return new Helpers.UnprocessableEntityObjectResult(ModelState);
+                }
+
+                _discussionBoardRepository.UpdatePost(postDto);
+
+                if (!_discussionBoardRepository.Save())
+                {
+                    throw new AppException("Updating post failed on save.");
+                }
+
+                return NoContent();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("updateReply")]
+        public IActionResult UpdateReply([FromBody] ReplyDto replyDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    // return 422
+                    return new Helpers.UnprocessableEntityObjectResult(ModelState);
+                }
+
+                _discussionBoardRepository.UpdateReply(replyDto);
+
+                if (!_discussionBoardRepository.Save())
+                {
+                    throw new AppException("Updating post failed on save.");
+                }
+
+                return NoContent();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [AllowAnonymous]
         [HttpGet("getPost/{userId}")]
         public IActionResult GetPost(Guid userId, [FromQuery]Guid courseId, [FromQuery]string keyword)
         {

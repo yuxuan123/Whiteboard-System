@@ -8,6 +8,7 @@ namespace WhiteboardAPI.Model
         public string Description { get; set; }
         public string Role { get; set; }
         public string UserName { get; set; }
+        public bool isEdited { get; set; }
         public DateTime CreatedOn { get; set; }
         public Guid CreatedBy { get; set; }
     }
