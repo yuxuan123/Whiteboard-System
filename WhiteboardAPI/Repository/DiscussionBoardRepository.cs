@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using AutoMapper;
 using WhiteboardAPI.Database;
 using WhiteboardAPI.Entities;
@@ -15,11 +16,14 @@ namespace WhiteboardAPI.Repository
         ReplyDE CreateReply(ReplyDto replyDto);
         CourseFolderDE CreateCourseFolder(CourseFolderDto courseFolderDto);
         void CreatePostFolder(Guid postId, List<Guid> courseFolderId);
+        PagedList<PostDto> GetAllPosts(ResourceParameters resourceParameters);
         IEnumerable<PostDE> GetPostsByUser(Guid userId, Guid courseId, string keyword);
         IEnumerable<PostDE> GetPostsByCourse(Guid courseId);
         IEnumerable<ReplyDE> GetReplies(Guid PostId);
         IEnumerable<CourseFolderDE> GetCourseFolders(Guid CourseId); //get course dto
         IEnumerable<PostFolderDE> GetPostFolders(Guid postId);
+        void UpdatePost(PostDto postDto);
+        void UpdateReply(ReplyDto replyDto);
         void DeletePost(Guid postId);
         void DeleteReply(Guid postId);
         void DeleteCourseFolder(Guid courseFolderId);
@@ -51,6 +55,7 @@ namespace WhiteboardAPI.Repository
 
             post.PostId = new Guid();
             post.CreatedOn = DateTime.Now;
+            post.isEdited = false;
 
             if (postDto.CourseFolderId.Count > 0)
                 CreatePostFolder(postDto.PostId, postDto.CourseFolderId);
@@ -76,6 +81,7 @@ namespace WhiteboardAPI.Repository
 
             reply.ReplyId = new Guid();
             reply.CreatedOn = DateTime.Now;
+            reply.isEdited = false;
 
             _context.tbl_db_reply.Add(reply);
             _context.SaveChanges();
@@ -111,6 +117,21 @@ namespace WhiteboardAPI.Repository
                 _context.tbl_db_post_folder.Add(postFolder);
             }
             _context.SaveChangesAsync().Wait();
+
+        }
+
+        public PagedList<PostDto> GetAllPosts(ResourceParameters resourceParameters)
+        {
+            var collectionBeforePaging = string.IsNullOrEmpty(resourceParameters.keyword) ? _context.tbl_db_post.OrderBy(resourceParameters.OrderBy) : _context.tbl_db_post.Where(x => x.Title.Contains(resourceParameters.keyword)).OrderBy(resourceParameters.OrderBy);
+
+            var postDtos = _mapper.Map<IEnumerable<PostDto>>(collectionBeforePaging);
+
+            foreach(PostDto p in postDtos)
+            {
+                p.UserName = _userRepository.GetUser(p.CreatedBy).UserName;
+            }
+
+            return PagedList<PostDto>.Create(postDtos, resourceParameters.PageNumber, resourceParameters.PageSize);
 
         }
 
@@ -154,6 +175,47 @@ namespace WhiteboardAPI.Repository
         public bool CourseFolderExists(Guid courseFolderId)
         {
             return _context.tbl_db_course_folder.Any(x => x.CourseFolderId == courseFolderId);
+        }
+
+        public void UpdatePost(PostDto postDto)
+        {
+            PostDE post = _context.tbl_db_post.Where(x => x.PostId == postDto.PostId).FirstOrDefault();
+
+            if (post == null)
+                throw new AppException("PostId does not exist");
+
+            if (!string.IsNullOrEmpty(postDto.Title))
+            {
+                post.Title = postDto.Title;
+            }
+
+            if (!string.IsNullOrEmpty(postDto.Title))
+            {
+                post.Description = postDto.Description;
+            }
+
+            post.isEdited = true;
+
+            _context.tbl_db_post.Update(post);
+
+        }
+
+        public void UpdateReply(ReplyDto replyDto)
+        {
+            ReplyDE reply = _context.tbl_db_reply.Where(x => x.ReplyId == replyDto.ReplyId).FirstOrDefault();
+
+            if (reply == null)
+                throw new AppException("ReplyId does not exist");
+
+            if (!string.IsNullOrEmpty(replyDto.Description))
+            {
+                reply.Description = replyDto.Description;
+            }
+
+            reply.isEdited = true;
+
+            _context.tbl_db_reply.Update(reply);
+
         }
 
         public void DeletePost(Guid postId)
