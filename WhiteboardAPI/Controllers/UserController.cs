@@ -20,7 +20,6 @@ using WhiteboardAPI.Entities;
 namespace WhiteboardAPI.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
     [ApiController]
     public class UserController : Controller
     {

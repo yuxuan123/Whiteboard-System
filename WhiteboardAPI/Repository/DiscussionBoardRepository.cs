@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using AutoMapper;
 using WhiteboardAPI.Database;
 using WhiteboardAPI.Entities;
@@ -15,6 +16,7 @@ namespace WhiteboardAPI.Repository
         ReplyDE CreateReply(ReplyDto replyDto);
         CourseFolderDE CreateCourseFolder(CourseFolderDto courseFolderDto);
         void CreatePostFolder(Guid postId, List<Guid> courseFolderId);
+        PagedList<PostDto> GetAllPosts(ResourceParameters resourceParameters);
         IEnumerable<PostDE> GetPostsByUser(Guid userId, Guid courseId, string keyword);
         IEnumerable<PostDE> GetPostsByCourse(Guid courseId);
         IEnumerable<ReplyDE> GetReplies(Guid PostId);
@@ -111,6 +113,21 @@ namespace WhiteboardAPI.Repository
                 _context.tbl_db_post_folder.Add(postFolder);
             }
             _context.SaveChangesAsync().Wait();
+
+        }
+
+        public PagedList<PostDto> GetAllPosts(ResourceParameters resourceParameters)
+        {
+            var collectionBeforePaging = string.IsNullOrEmpty(resourceParameters.keyword) ? _context.tbl_db_post.OrderBy(resourceParameters.OrderBy) : _context.tbl_db_post.Where(x => x.Title.Contains(resourceParameters.keyword)).OrderBy(resourceParameters.OrderBy);
+
+            var postDtos = _mapper.Map<IEnumerable<PostDto>>(collectionBeforePaging);
+
+            foreach(PostDto p in postDtos)
+            {
+                p.UserName = _userRepository.GetUser(p.CreatedBy).UserName;
+            }
+
+            return PagedList<PostDto>.Create(postDtos, resourceParameters.PageNumber, resourceParameters.PageSize);
 
         }
 
