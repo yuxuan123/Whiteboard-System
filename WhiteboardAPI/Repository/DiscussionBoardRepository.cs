@@ -20,6 +20,7 @@ namespace WhiteboardAPI.Repository
         IEnumerable<PostDE> GetPostsByUser(Guid userId, Guid courseId, string keyword);
         IEnumerable<PostDE> GetPostsByCourse(Guid courseId);
         IEnumerable<ReplyDE> GetReplies(Guid PostId);
+        IEnumerable<CourseFolderDE> GetAllCourseFolders();
         IEnumerable<CourseFolderDE> GetCourseFolders(Guid CourseId); //get course dto
         IEnumerable<PostFolderDE> GetPostFolders(Guid postId);
         void UpdatePost(PostDto postDto);
@@ -155,6 +156,11 @@ namespace WhiteboardAPI.Repository
         public IEnumerable<ReplyDE> GetReplies(Guid postId)
         {
             return _context.tbl_db_reply.Where(x => x.PostId == postId);
+        }
+
+        public IEnumerable<CourseFolderDE> GetAllCourseFolders()
+        {
+            return _context.tbl_db_course_folder;
         }
 
         public IEnumerable<CourseFolderDE> GetCourseFolders(Guid courseId)
