@@ -62,7 +62,7 @@
                 align-center
                 justify-center
                 color="general"
-                to="/login"
+                to="login"
               >
                 Back
               </v-btn>

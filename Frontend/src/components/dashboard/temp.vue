@@ -1,50 +1,79 @@
 <template>
-  <v-container fill-height fluid grid-list-xl>
-    <v-layout align-center justify-center wrap>
+  <v-container
+    fill-height
+    fluid
+    grid-list-xl
+  >
+    <v-layout
+      justify-center
+      wrap
+    >
       <v-flex md12>
         <div>
           <material-card
             color="general"
-            title="Admin Dashboard"
-            text="Manage User Accounts"
+            title="Manage Users"
+            text="Manage user accounts"
           >
             <v-spacer />
-            <br />
-            <v-dialog v-model="discussionDialog" max-width="1000px">
+            <br>
+            <v-dialog
+              v-model="userDialog"
+              max-width="1000px"
+            >
               <v-card>
                 <v-card-title>
                   <span class="headline">{{ formTitle }}</span>
                 </v-card-title>
                 <v-card-text>
-                  <v-container class="pt-0" grid-list-md>
+                  <v-container
+                    class="pt-0"
+                    grid-list-md
+                  >
                     <v-layout wrap>
-                      <v-flex xs12 sm6 md6>
+                      <v-flex
+                        xs12
+                        sm6
+                        md6
+                      >
                         <v-text-field
-                          v-model="viewingDiscussion.username"
+                          v-model="viewingUser.name"
                           label="Name"
                           readonly
                         />
                       </v-flex>
 
-                      <v-flex xs12 sm6 md6>
+                      <v-flex
+                        xs12
+                        sm12
+                        md12
+                      >
                         <v-text-field
-                          v-model="viewingDiscussion.email"
+                          v-model="viewingUser.email"
                           label="Email"
                           readonly
                         />
                       </v-flex>
 
-                      <v-flex xs12 sm6 md6>
+                      <v-flex
+                        xs12
+                        sm12
+                        md12
+                      >
                         <v-text-field
-                          v-model="viewingDiscussion.phoneno"
-                          label="Phone Number"
+                          v-model="viewingUser.phoneno"
+                          label="Email"
                           readonly
                         />
                       </v-flex>
 
-                      <v-flex xs12 sm6 md6>
+                      <v-flex
+                        xs12
+                        sm12
+                        md12
+                      >
                         <v-text-field
-                          v-model="viewingDiscussion.role"
+                          v-model="viewingUser.role"
                           label="Role"
                           readonly
                         />
@@ -53,16 +82,28 @@
                   </v-container>
                   <v-card-actions>
                     <v-spacer />
-                    <v-btn color="blue darken-1" flat @click="closeviewingDiscussion">
+                    <v-btn
+                      color="blue darken-1"
+                      flat
+                      @click="closeViewingUser"
+                    >
                       Close
                     </v-btn>
                   </v-card-actions>
                 </v-card-text>
               </v-card>
             </v-dialog>
-            <v-dialog v-model="dialog" max-width="1000px">
+            <v-dialog
+              v-model="dialog"
+              max-width="1000px"
+            >
               <template v-slot:activator="{ on }">
-                <v-btn color="general" dark v-on="on">
+                <v-btn
+                  color="general"
+                  dark
+                  class="mb-3"
+                  v-on="on"
+                >
                   New User
                 </v-btn>
               </template>
@@ -73,33 +114,52 @@
                     <span class="headline">{{ formTitle }}</span>
                   </v-card-title>
                   <v-form ref="createform">
-                    <v-container class="pt-0" grid-list-md>
+                    <v-container
+                      class="pt-0"
+                      grid-list-md
+                    >
                       <v-layout wrap>
-                        <v-flex xs12 sm6 md6>
+                        <v-flex
+                          xs12
+                          sm6
+                          md6
+                        >
                           <v-text-field
-                            v-model="editedDiscussion.username"
+                            v-model="editedUser.name"
                             label="Name"
                             :readonly="isViewing"
                           />
                         </v-flex>
-                        <v-flex xs12 sm6 md6>
+                        <v-flex
+                          xs12
+                          sm6
+                          md6
+                        >
                           <v-text-field
-                            v-model="editedDiscussion.email"
+                            v-model="editedUser.email"
                             label="Email"
                             :readonly="isViewing"
                           />
                         </v-flex>
-                        <v-flex xs12 sm6 md6>
+                        <v-flex
+                          xs12
+                          sm6
+                          md6
+                        >
                           <v-text-field
-                            v-model="editedDiscussion.phoneno"
+                            v-model="editedUser.phoneno"
                             label="Phone No"
                             :readonly="isViewing"
                           />
                         </v-flex>
 
-                        <v-flex xs6 sm6 md6>
+                        <v-flex
+                          xs6
+                          sm6
+                          md6
+                        >
                           <v-text-field
-                            v-model="editedDiscussion.role"
+                            v-model="editedUser.role"
                             label="Role"
                             :readonly="isViewing"
                           />
@@ -111,7 +171,11 @@
 
                 <v-card-actions>
                   <v-spacer />
-                  <v-btn color="blue darken-1" flat @click="close">
+                  <v-btn
+                    color="blue darken-1"
+                    flat
+                    @click="close"
+                  >
                     Cancel
                   </v-btn>
                   <v-btn
@@ -126,7 +190,11 @@
               </v-card>
             </v-dialog>
 
-            <v-flex xs12 sm12 md12>
+            <v-flex
+              xs12
+              sm12
+              md12
+            >
               <v-text-field
                 v-model.lazy="search"
                 class="mb-2"
@@ -139,7 +207,7 @@
 
             <v-data-table
               :headers="headers"
-              :items="DiscussionList"
+              :items="UserList"
               :pagination.sync="pagination"
               :rows-per-page-items="pagination.rowsPerPageItems"
               :total-items="pagination.totalItems"
@@ -147,19 +215,28 @@
               class="elevation-1"
             >
               <!-- change table header background and text color(or other properties) -->
-              <template slot="headerCell" slot-scope="{ header }">
+              <template
+                slot="headerCell"
+                slot-scope="{ header }"
+              >
                 <span
                   class="subheading font-weight-light text-general text--darken-3"
                   v-text="header.text"
                 />
               </template>
-              <template slot="items" slot-scope="props">
+              <template
+                slot="items"
+                slot-scope="props"
+              >
                 <td>{{ props.item.username }}</td>
                 <td>{{ props.item.email }}</td>
                 <td>{{ props.item.phoneno }}</td>
                 <td>{{ props.item.role }}</td>
                 <td>
-                  <v-layout align-center justify-center>
+                  <v-layout
+                    align-center
+                    justify-center
+                  >
                     <v-card-actions>
                       <v-btn
                         flat
@@ -167,7 +244,10 @@
                         color="blue lighten-1"
                         @click="viewUser(props.item)"
                       >
-                        <v-icon size="20" color="blue lighten-1">
+                        <v-icon
+                          size="20"
+                          color="blue lighten-1"
+                        >
                           mdi-eye
                         </v-icon>
                       </v-btn>
@@ -177,7 +257,10 @@
                         color="blue lighten-1"
                         @click="editUser(props.item)"
                       >
-                        <v-icon size="20" color="blue lighten-1">
+                        <v-icon
+                          size="20"
+                          color="blue lighten-1"
+                        >
                           edit
                         </v-icon>
                       </v-btn>
@@ -187,7 +270,10 @@
                         color="blue lighten-1"
                         @click="emailUser(props.item)"
                       >
-                        <v-icon size="20" color="blue lighten-1">
+                        <v-icon
+                          size="20"
+                          color="blue lighten-1"
+                        >
                           mdi-email
                         </v-icon>
                       </v-btn>
@@ -197,7 +283,10 @@
                         color="blue lighten-1"
                         @click="deleteUser(props.item)"
                       >
-                        <v-icon size="20" color="blue lighten-1">
+                        <v-icon
+                          size="20"
+                          color="blue lighten-1"
+                        >
                           delete
                         </v-icon>
                       </v-btn>
@@ -218,7 +307,7 @@ export default {
   data: () => ({
     loading: false,
     isViewing: false,
-    discussionDialog: false,
+    userDialog: false,
     search: "",
     pagination: {
       page: 1,
@@ -228,14 +317,36 @@ export default {
       rowsPerPageItems: [5, 10, 15],
       totalItems: 0
     },
-    DiscussionList: [
+    UserList: [
       {
-        postId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        courseId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        title: "alan@gmail.com",
-        description: "Testing here 123",
-        createdBy: "2020-03-04T06:29:03.565Z",
-        createdOn: "2020-03-04T06:29:03.565Z"
+        id: "1",
+        username: "Alan",
+        phoneno: "98765432",
+        role: "User"
+      },
+      {
+        id: "2",
+        username: "Bill",
+        phoneno: "91234567",
+        role: "User"
+      },
+      {
+        id: "3",
+        username: "Charlie",
+        phoneno: "92726262",
+        role: "Admin"
+      },
+      {
+        id: "4",
+        username: "Delta",
+        phoneno: "98272722",
+        role: "User"
+      },
+      {
+        id: "5",
+        username: "Ethan",
+        phoneno: "92726223",
+        role: "Admin"
       }
     ],
     dialog: false,
@@ -266,8 +377,9 @@ export default {
       }
     ],
     editedIndex: -1,
-    editedDiscussion: {},
-    viewingDiscussion: {}
+    editedUser: {},
+    defaultItem: {},
+    viewingUser: {}
   }),
   computed: {
     formTitle() {
@@ -283,8 +395,8 @@ export default {
       if (!val) val || this.close();
     },
 
-    discussionDialog(val) {
-      val || this.closeviewingDiscussion();
+    userDialog(val) {
+      val || this.closeViewingUser();
     },
 
     pagination: {
@@ -296,7 +408,7 @@ export default {
 
     search: {
       handler(input) {
-        this.searchUser(input);
+        //this.searchUser()
       }
     }
   },
@@ -305,19 +417,19 @@ export default {
     getUsers() {
       this.loading = true;
       const { page, rowsPerPage, sortBy, descending } = this.pagination;
-      this.pagination.totalItems = this.DiscussionList.length;
+      this.pagination.totalItems = this.UserList.length;
     },
 
     editUser(user) {
-      this.editedIndex = this.DiscussionList.indexOf(user);
-      this.editedDiscussion = Object.assign({}, user);
+      this.editedIndex = this.UserList.indexOf(user);
+      this.editedUser = Object.assign({}, user);
       this.dialog = true;
     },
 
     viewUser(user) {
       this.editedIndex = -2;
-      this.viewingDiscussion = Object.assign({}, user);
-      this.discussionDialog = true;
+      this.viewingUser = Object.assign({}, user);
+      this.userDialog = true;
     },
     emailUser(user) {
       var answer = window.confirm("Send activation email?");
@@ -329,18 +441,20 @@ export default {
       var answer = window.confirm("Confirm delete user?");
       if (answer) {
         this.loading = true;
-        let userIndex = this.DiscussionList.findIndex(item => item.id === user.id);
+        let userIndex = this.UserList.findIndex(item => item.id === user.id);
         if (~userIndex) {
-          this.DiscussionList.splice(userIndex, 1);
+          this.UserList.splice(userIndex, 1);
           this.loading = false;
         }
-        this.pagination.totalItems = this.DiscussionList.length;
+        this.pagination.totalItems = this.pagination.totalItems - 1;
       }
     },
 
     close() {
-      this.editedDiscussion = {};
+      for (let keys in this.editedUser) delete this.editedUser[keys];
+
       this.$refs.createform.reset();
+
       this.dialog = false;
       this.isViewing = false;
 
@@ -349,10 +463,10 @@ export default {
       }, 300);
     },
 
-    closeviewingDiscussion() {
+    closeViewingUser() {
       this.editedIndex = -1;
-      for (let keys in this.viewingDiscussion) delete this.viewingDiscussion[keys];
-      this.discussionDialog = false;
+      for (let keys in this.viewingUser) delete this.viewingUser[keys];
+      this.userDialog = false;
     },
 
     save() {
@@ -364,31 +478,107 @@ export default {
     },
 
     createUser() {
-      this.DiscussionList.push(this.editedDiscussion);
-      this.pagination.totalItems = this.DiscussionList.length;
+      this.pagination.totalItems = this.pagination.totalItems + 1;
+      this.UserList.push(this.editedUser);
       this.close();
     },
 
     submitEditUser() {
-      let userIndex = this.DiscussionList.findIndex(
-        user => user.id === this.editedDiscussion.id
-      );
 
-      console.log(userIndex);
-      console.log(this.editedDiscussion);
-      this.DiscussionList.splice(userIndex, 1, this.editedDiscussion);
-      console.log(this.DiscussionList);
-      this.close();
+ let userIndex = this.UserList.findIndex(
+            user => user.id === this.editedUser.id
+          );
 
-      this.loading = true;
+          this.UserList.splice(userIndex, 1, this.editedUser)
+          this.close();
+
+          this.loading = true;
     },
 
     searchUser(input) {
       if (input.length > 2) {
-        //API Call
-        console.log(input);
+          //API Call
       }
+    },
+
+    
+
+
+    cropSuccess(imgDataUrl, field) {
+      this.imgDataUrl = imgDataUrl;
+    },
+    cropUploadSuccess(res) {
+      if (res.type == "cover") {
+        this.coverImgDir.push(res.fileUrl);
+      } else if (res.type == "profile") {
+        this.profileImgDir.push(res.fileUrl);
+      }
+    },
+    cropUploadFail(status, field) {
+      console.log("imageUploadFailed");
+    },
+
+    toggleShow(name) {
+      if (name == "cover") {
+        this.showCoverUpload = !this.showCoverUpload;
+      } else if (name == "profile") {
+        this.showProfileUpload = !this.showProfileUpload;
+      }
+    },
+
+    removeUnusedImages() {
+      let junkImageList = this.coverImgDir.concat(this.profileImgDir);
+      if (junkImageList.length <= 0) return;
+
+      let deleteImageList = {
+        fileUrl: junkImageList
+      };
+
+      this.axios({
+        method: "delete",
+        url: "/api/uploads/clear",
+        data: deleteImageList,
+        config: { headers: { "Content-Type": "application/json" } }
+      });
+
+      this.posterImgDir.splice(0, this.posterImgDir.length);
+      this.approvalImgDir.splice(0, this.approvalImgDir.length);
+    },
+
+    getCoverProfileUrl() {
+      if (this.profileImgDir.length > 0) {
+        this.editedUser.profileUrl = this.profileImgDir[
+          this.profileImgDir.length - 1
+        ];
+      }
+
+      if (this.coverImgDir.length > 0) {
+        this.editedUser.coverUrl = this.coverImgDir[
+          this.coverImgDir.length - 1
+        ];
+      }
+    },
+
+    inited(viewer) {
+      this.$viewer = viewer;
     }
   }
 };
 </script>
+
+<style>
+table.v-table thead tr {
+  color: red !important;
+}
+tbody tr:nth-of-type(odd) {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.club-info-text-area-label {
+  font-size: 14px;
+  color: #a3a3a3;
+  font-weight: 400;
+  margin-bottom: 7px;
+  display: inline-block;
+}
+</style>

@@ -1,0 +1,38 @@
+
+@media screen and (max-width: 768px) {
+    .welcomemsg {
+      display: none;
+    }
+  
+    .mobile table tr {
+      width: inherit !important;
+      display: block;
+    }
+  
+    .mobile table tr:nth-child(even) {
+      border-left: 6px solid cyan;
+    }
+  
+    .mobile table tr:nth-child(odd) {
+      border-left: 6px solid deeppink;
+    }
+  
+    .mobile table tr td ul li {
+      margin-left: -30px;
+    }
+  
+    .mobile table tr td ul li:before {
+      content: attr(data-label);
+      padding-top: 10px;
+      text-align: left;
+      display: block;
+      color: black;
+    }
+  
+    .v-picker__body {
+      margin: initial;
+      width: 100%;
+      height: 100%;
+    }
+  }
+  
