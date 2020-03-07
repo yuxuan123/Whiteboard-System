@@ -6,11 +6,11 @@
           <material-card
             color="general"
             title="Admin Dashboard"
-            text="Manage User Accounts"
+            text="Manage Discussions"
           >
             <v-spacer />
             <br />
-            <v-dialog v-model="discussionDialog" max-width="1000px">
+            <v-dialog v-model="userDialog" max-width="1000px">
               <v-card>
                 <v-card-title>
                   <span class="headline">{{ formTitle }}</span>
@@ -20,7 +20,7 @@
                     <v-layout wrap>
                       <v-flex xs12 sm6 md6>
                         <v-text-field
-                          v-model="viewingDiscussion.username"
+                          v-model="viewingUser.userName"
                           label="Name"
                           readonly
                         />
@@ -28,7 +28,7 @@
 
                       <v-flex xs12 sm6 md6>
                         <v-text-field
-                          v-model="viewingDiscussion.email"
+                          v-model="viewingUser.email"
                           label="Email"
                           readonly
                         />
@@ -36,7 +36,7 @@
 
                       <v-flex xs12 sm6 md6>
                         <v-text-field
-                          v-model="viewingDiscussion.phoneno"
+                          v-model="viewingUser.phoneNo"
                           label="Phone Number"
                           readonly
                         />
@@ -44,7 +44,7 @@
 
                       <v-flex xs12 sm6 md6>
                         <v-text-field
-                          v-model="viewingDiscussion.role"
+                          v-model="viewingUser.role"
                           label="Role"
                           readonly
                         />
@@ -53,7 +53,7 @@
                   </v-container>
                   <v-card-actions>
                     <v-spacer />
-                    <v-btn color="blue darken-1" flat @click="closeviewingDiscussion">
+                    <v-btn color="blue darken-1" flat @click="closeViewingUser">
                       Close
                     </v-btn>
                   </v-card-actions>
@@ -77,21 +77,21 @@
                       <v-layout wrap>
                         <v-flex xs12 sm6 md6>
                           <v-text-field
-                            v-model="editedDiscussion.username"
+                            v-model="editedUser.userName"
                             label="Name"
                             :readonly="isViewing"
                           />
                         </v-flex>
                         <v-flex xs12 sm6 md6>
                           <v-text-field
-                            v-model="editedDiscussion.email"
+                            v-model="editedUser.email"
                             label="Email"
                             :readonly="isViewing"
                           />
                         </v-flex>
                         <v-flex xs12 sm6 md6>
                           <v-text-field
-                            v-model="editedDiscussion.phoneno"
+                            v-model="editedUser.phoneNo"
                             label="Phone No"
                             :readonly="isViewing"
                           />
@@ -99,7 +99,7 @@
 
                         <v-flex xs6 sm6 md6>
                           <v-text-field
-                            v-model="editedDiscussion.role"
+                            v-model="editedUser.role"
                             label="Role"
                             :readonly="isViewing"
                           />
@@ -128,7 +128,7 @@
 
             <v-flex xs12 sm12 md12>
               <v-text-field
-                v-model.lazy="search"
+                v-model.lazy="pagination.search"
                 class="mb-2"
                 append-icon="search"
                 label="Search"
@@ -139,7 +139,7 @@
 
             <v-data-table
               :headers="headers"
-              :items="DiscussionList"
+              :items="UserList"
               :pagination.sync="pagination"
               :rows-per-page-items="pagination.rowsPerPageItems"
               :total-items="pagination.totalItems"
@@ -154,9 +154,9 @@
                 />
               </template>
               <template slot="items" slot-scope="props">
-                <td>{{ props.item.username }}</td>
+                <td>{{ props.item.userName }}</td>
                 <td>{{ props.item.email }}</td>
-                <td>{{ props.item.phoneno }}</td>
+                <td>{{ props.item.phoneNo }}</td>
                 <td>{{ props.item.role }}</td>
                 <td>
                   <v-layout align-center justify-center>
@@ -210,6 +210,12 @@
         </div>
       </v-flex>
     </v-layout>
+    <v-snackbar v-model="snackbar" :color="color" :top="true">
+      {{ message }}
+      <v-btn dark flat @click="snackbar = false">
+        Close
+      </v-btn>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -218,9 +224,9 @@ export default {
   data: () => ({
     loading: false,
     isViewing: false,
-    discussionDialog: false,
-    search: "",
+    userDialog: false,
     pagination: {
+      search: "",
       page: 1,
       rowsPerPage: 5,
       sortBy: "name",
@@ -228,27 +234,17 @@ export default {
       rowsPerPageItems: [5, 10, 15],
       totalItems: 0
     },
-    DiscussionList: [
-      {
-        postId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        courseId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        title: "alan@gmail.com",
-        description: "Testing here 123",
-        createdBy: "2020-03-04T06:29:03.565Z",
-        createdOn: "2020-03-04T06:29:03.565Z"
-      }
-    ],
+    UserList: [],
     dialog: false,
-    search: "",
     headers: [
       {
         text: "Username",
-        value: "username"
+        value: "userName"
       },
       { text: "Email", value: "email" },
       {
         text: "Phone Number",
-        value: "phoneno",
+        value: "phoneNo",
         filterable: false,
         sortable: false
       },
@@ -266,8 +262,11 @@ export default {
       }
     ],
     editedIndex: -1,
-    editedDiscussion: {},
-    viewingDiscussion: {}
+    editedUser: {},
+    viewingUser: {},
+    snackbar: false,
+    color: "general",
+    message: ""
   }),
   computed: {
     formTitle() {
@@ -283,13 +282,13 @@ export default {
       if (!val) val || this.close();
     },
 
-    discussionDialog(val) {
-      val || this.closeviewingDiscussion();
+    userDialog(val) {
+      val || this.closeViewingUser();
     },
 
     pagination: {
       handler() {
-        //this.getUsers();
+        this.getUsers();
       },
       deep: true
     },
@@ -304,42 +303,48 @@ export default {
   methods: {
     getUsers() {
       this.loading = true;
-      const { page, rowsPerPage, sortBy, descending } = this.pagination;
-      this.pagination.totalItems = this.DiscussionList.length;
+      this.$store
+        .dispatch("GETALLUSER", this.pagination)
+        .then(response => {
+          this.loading = false;
+          this.UserList = response.data;
+          this.pagination.totalItems = response.data.length;
+        })
+        .catch(err => {
+          this.snackbar = true;
+          this.color = "error";
+          this.message = "Error, Please try again later";
+        });
     },
 
-    editUser(user) {
-      this.editedIndex = this.DiscussionList.indexOf(user);
-      this.editedDiscussion = Object.assign({}, user);
-      this.dialog = true;
+    searchUser(input) {
+      if (input.length > 2) {
+        //API Call
+        this.getUsers();
+      }
     },
 
     viewUser(user) {
       this.editedIndex = -2;
-      this.viewingDiscussion = Object.assign({}, user);
-      this.discussionDialog = true;
+      this.viewingUser = Object.assign({}, user);
+      this.userDialog = true;
     },
+
+    editUser(user) {
+      this.editedIndex = this.UserList.indexOf(user);
+      this.editedUser = Object.assign({}, user);
+      this.dialog = true;
+    },
+
     emailUser(user) {
       var answer = window.confirm("Send activation email?");
       if (answer) {
         //Send Activation Email
       }
     },
-    deleteUser(user) {
-      var answer = window.confirm("Confirm delete user?");
-      if (answer) {
-        this.loading = true;
-        let userIndex = this.DiscussionList.findIndex(item => item.id === user.id);
-        if (~userIndex) {
-          this.DiscussionList.splice(userIndex, 1);
-          this.loading = false;
-        }
-        this.pagination.totalItems = this.DiscussionList.length;
-      }
-    },
 
     close() {
-      this.editedDiscussion = {};
+      this.editedUser = {};
       this.$refs.createform.reset();
       this.dialog = false;
       this.isViewing = false;
@@ -349,10 +354,10 @@ export default {
       }, 300);
     },
 
-    closeviewingDiscussion() {
+    closeViewingUser() {
       this.editedIndex = -1;
-      for (let keys in this.viewingDiscussion) delete this.viewingDiscussion[keys];
-      this.discussionDialog = false;
+      for (let keys in this.viewingUser) delete this.viewingUser[keys];
+      this.userDialog = false;
     },
 
     save() {
@@ -364,29 +369,59 @@ export default {
     },
 
     createUser() {
-      this.DiscussionList.push(this.editedDiscussion);
-      this.pagination.totalItems = this.DiscussionList.length;
+      this.$store
+        .dispatch("CREATEUSER", this.editedUser)
+        .then(response => {
+          this.UserList.push(this.editedUser);
+          this.pagination.totalItems = this.UserList.length;
+        })
+        .catch(err => {
+          this.snackbar = true;
+          this.color = "error";
+          this.message = "Create Error, Please try again later";
+        });
       this.close();
     },
 
     submitEditUser() {
-      let userIndex = this.DiscussionList.findIndex(
-        user => user.id === this.editedDiscussion.id
-      );
-
-      console.log(userIndex);
-      console.log(this.editedDiscussion);
-      this.DiscussionList.splice(userIndex, 1, this.editedDiscussion);
-      console.log(this.DiscussionList);
+      this.$store
+        .dispatch("UPDATEUSER", this.editedUser)
+        .then(response => {
+          let userIndex = this.UserList.findIndex(
+            user => user.id === this.editedUser.userId
+          );
+          this.UserList.splice(userIndex, 1, this.editedUser);
+          this.pagination.totalItems = this.UserList.length;
+        })
+        .catch(err => {
+          this.snackbar = true;
+          this.color = "error";
+          this.message = "Update Error, Please try again later";
+        });
       this.close();
-
-      this.loading = true;
     },
 
-    searchUser(input) {
-      if (input.length > 2) {
-        //API Call
-        console.log(input);
+    deleteUser(user) {
+      var answer = window.confirm("Confirm delete user?");
+      if (answer) {
+        this.$store
+          .dispatch("DELETEUSER", user)
+          .then(response => {
+            this.loading = true;
+            let userIndex = this.UserList.findIndex(
+              item => item.id === user.id
+            );
+            if (~userIndex) {
+              this.UserList.splice(userIndex, 1);
+              this.loading = false;
+            }
+            this.pagination.totalItems = this.UserList.length;
+          })
+          .catch(err => {
+            this.snackbar = true;
+            this.color = "error";
+            this.message = "Error, Please try again later";
+          });
       }
     }
   }

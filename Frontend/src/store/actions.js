@@ -32,11 +32,64 @@ export default {
       resolve(true);
     })
   },
-  GETUSER({ commit }, userid) {
+  GETALLUSER({ commit }, pagination) {
     return new Promise((resolve, reject) => {
-      resolve(true);
+      const { page, rowsPerPage, sortBy, descending, search } = pagination;
+      //Apply asc/desc to sorting Name
+      if (descending != true && descending != undefined) {
+        sortBy = sortBy + " desc";
+      }
+      // Removed Params for now. Waiting for Cors
+      // { params: { PageNumber: page, PageSize: rowsPerPage, OrderBy: sortBy, keyword: search } }
+      axios.get(API_URL + '/getAllUsers')
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
+
+  CREATEUSER({ commit }, user){
+    //Hardcode Password
+    user.password = "user1234!";
+    return new Promise((resolve, reject) => {
+      axios.post(API_URL + '/createUser', user)
+        .then(response => {
+          resolve(true)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  UPDATEUSER({ commit }, user){
+    return new Promise((resolve, reject) => {
+      axios.put(API_URL + '/' + user.userId, user)
+        .then(response => {
+          resolve(true)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  DELETEUSER({ commit }, user){
+    return new Promise((resolve, reject) => {
+      axios.delete(API_URL + '/' + user.userId, user)
+        .then(response => {
+          resolve(true)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+
   CHANGEPASSWORD({ commit }, payload) {
     return new Promise((resolve, reject) => {
       resolve(true);

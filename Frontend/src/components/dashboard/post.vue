@@ -6,11 +6,11 @@
           <material-card
             color="general"
             title="Admin Dashboard"
-            text="Manage Discussions"
+            text="Manage User Accounts"
           >
             <v-spacer />
             <br />
-            <v-dialog v-model="userDialog" max-width="1000px">
+            <v-dialog v-model="discussionDialog" max-width="1000px">
               <v-card>
                 <v-card-title>
                   <span class="headline">{{ formTitle }}</span>
@@ -20,7 +20,7 @@
                     <v-layout wrap>
                       <v-flex xs12 sm6 md6>
                         <v-text-field
-                          v-model="viewingUser.username"
+                          v-model="viewingDiscussion.username"
                           label="Name"
                           readonly
                         />
@@ -28,7 +28,7 @@
 
                       <v-flex xs12 sm6 md6>
                         <v-text-field
-                          v-model="viewingUser.email"
+                          v-model="viewingDiscussion.email"
                           label="Email"
                           readonly
                         />
@@ -36,7 +36,7 @@
 
                       <v-flex xs12 sm6 md6>
                         <v-text-field
-                          v-model="viewingUser.phoneno"
+                          v-model="viewingDiscussion.phoneno"
                           label="Phone Number"
                           readonly
                         />
@@ -44,7 +44,7 @@
 
                       <v-flex xs12 sm6 md6>
                         <v-text-field
-                          v-model="viewingUser.role"
+                          v-model="viewingDiscussion.role"
                           label="Role"
                           readonly
                         />
@@ -53,7 +53,11 @@
                   </v-container>
                   <v-card-actions>
                     <v-spacer />
-                    <v-btn color="blue darken-1" flat @click="closeViewingUser">
+                    <v-btn
+                      color="blue darken-1"
+                      flat
+                      @click="closeviewingDiscussion"
+                    >
                       Close
                     </v-btn>
                   </v-card-actions>
@@ -77,21 +81,21 @@
                       <v-layout wrap>
                         <v-flex xs12 sm6 md6>
                           <v-text-field
-                            v-model="editedUser.username"
+                            v-model="editedDiscussion.username"
                             label="Name"
                             :readonly="isViewing"
                           />
                         </v-flex>
                         <v-flex xs12 sm6 md6>
                           <v-text-field
-                            v-model="editedUser.email"
+                            v-model="editedDiscussion.email"
                             label="Email"
                             :readonly="isViewing"
                           />
                         </v-flex>
                         <v-flex xs12 sm6 md6>
                           <v-text-field
-                            v-model="editedUser.phoneno"
+                            v-model="editedDiscussion.phoneno"
                             label="Phone No"
                             :readonly="isViewing"
                           />
@@ -99,7 +103,7 @@
 
                         <v-flex xs6 sm6 md6>
                           <v-text-field
-                            v-model="editedUser.role"
+                            v-model="editedDiscussion.role"
                             label="Role"
                             :readonly="isViewing"
                           />
@@ -139,7 +143,7 @@
 
             <v-data-table
               :headers="headers"
-              :items="UserList"
+              :items="DiscussionList"
               :pagination.sync="pagination"
               :rows-per-page-items="pagination.rowsPerPageItems"
               :total-items="pagination.totalItems"
@@ -210,6 +214,12 @@
         </div>
       </v-flex>
     </v-layout>
+    <v-snackbar v-model="snackbar" :color="color" :top="true">
+      {{ errorMessages }}
+      <v-btn dark flat @click="snackbar = false">
+        Close
+      </v-btn>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -218,55 +228,28 @@ export default {
   data: () => ({
     loading: false,
     isViewing: false,
-    userDialog: false,
+    discussionDialog: false,
     search: "",
     pagination: {
       page: 1,
       rowsPerPage: 5,
-      sortBy: "name",
+      sortBy: "",
       descending: true,
       rowsPerPageItems: [5, 10, 15],
-      totalItems: 0
+      totalItems: 0,
+      search: "",
     },
-    UserList: [
+    DiscussionList: [
       {
-        id: "1",
-        username: "Alan",
-        email: "alan@gmail.com",
-        phoneno: "98765432",
-        role: "User"
-      },
-      {
-        id: "2",
-        username: "Bill",
-        email: "bill@gmail.com",
-        phoneno: "91234567",
-        role: "User"
-      },
-      {
-        id: "3",
-        username: "Charlie",
-        email: "charlie@gmail.com",
-        phoneno: "92726262",
-        role: "Admin"
-      },
-      {
-        id: "4",
-        username: "Delta",
-        email: "delta@gmail.com",
-        phoneno: "98272722",
-        role: "User"
-      },
-      {
-        id: "5",
-        username: "Ethan",
-        email: "ethan@gmail.com",
-        phoneno: "92726223",
-        role: "Admin"
+        postId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        courseId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        title: "alan@gmail.com",
+        description: "Testing here 123",
+        createdBy: "2020-03-04T06:29:03.565Z",
+        createdOn: "2020-03-04T06:29:03.565Z"
       }
     ],
     dialog: false,
-    search: "",
     headers: [
       {
         text: "Username",
@@ -293,8 +276,11 @@ export default {
       }
     ],
     editedIndex: -1,
-    editedUser: {},
-    viewingUser: {}
+    editedDiscussion: {},
+    viewingDiscussion: {},
+    errorMessages: "",
+    snackbar: false,
+    color: "general"
   }),
   computed: {
     formTitle() {
@@ -310,13 +296,13 @@ export default {
       if (!val) val || this.close();
     },
 
-    userDialog(val) {
-      val || this.closeViewingUser();
+    discussionDialog(val) {
+      val || this.closeviewingDiscussion();
     },
 
     pagination: {
       handler() {
-        //this.getUsers();
+        this.getUsers();
       },
       deep: true
     },
@@ -331,20 +317,29 @@ export default {
   methods: {
     getUsers() {
       this.loading = true;
-      const { page, rowsPerPage, sortBy, descending } = this.pagination;
-      this.pagination.totalItems = this.UserList.length;
+      this.$store
+        .dispatch("GETALLUSER", this.pagination)
+        .then(response => {
+          console.log(response);
+        })
+        .catch(err => {
+          this.snackbar = true;
+          this.color = "error";
+          this.message = "Error, Please try again later";
+        });
+      this.pagination.totalItems = this.DiscussionList.length;
     },
 
     editUser(user) {
-      this.editedIndex = this.UserList.indexOf(user);
-      this.editedUser = Object.assign({}, user);
+      this.editedIndex = this.DiscussionList.indexOf(user);
+      this.editedDiscussion = Object.assign({}, user);
       this.dialog = true;
     },
 
     viewUser(user) {
       this.editedIndex = -2;
-      this.viewingUser = Object.assign({}, user);
-      this.userDialog = true;
+      this.viewingDiscussion = Object.assign({}, user);
+      this.discussionDialog = true;
     },
     emailUser(user) {
       var answer = window.confirm("Send activation email?");
@@ -356,17 +351,19 @@ export default {
       var answer = window.confirm("Confirm delete user?");
       if (answer) {
         this.loading = true;
-        let userIndex = this.UserList.findIndex(item => item.id === user.id);
+        let userIndex = this.DiscussionList.findIndex(
+          item => item.id === user.id
+        );
         if (~userIndex) {
-          this.UserList.splice(userIndex, 1);
+          this.DiscussionList.splice(userIndex, 1);
           this.loading = false;
         }
-        this.pagination.totalItems = this.UserList.length;
+        this.pagination.totalItems = this.DiscussionList.length;
       }
     },
 
     close() {
-      this.editedUser = {};
+      this.editedDiscussion = {};
       this.$refs.createform.reset();
       this.dialog = false;
       this.isViewing = false;
@@ -376,10 +373,11 @@ export default {
       }, 300);
     },
 
-    closeViewingUser() {
+    closeviewingDiscussion() {
       this.editedIndex = -1;
-      for (let keys in this.viewingUser) delete this.viewingUser[keys];
-      this.userDialog = false;
+      for (let keys in this.viewingDiscussion)
+        delete this.viewingDiscussion[keys];
+      this.discussionDialog = false;
     },
 
     save() {
@@ -391,20 +389,20 @@ export default {
     },
 
     createUser() {
-      this.UserList.push(this.editedUser);
-      this.pagination.totalItems = this.UserList.length;
+      this.DiscussionList.push(this.editedDiscussion);
+      this.pagination.totalItems = this.DiscussionList.length;
       this.close();
     },
 
     submitEditUser() {
-      let userIndex = this.UserList.findIndex(
-        user => user.id === this.editedUser.id
+      let userIndex = this.DiscussionList.findIndex(
+        user => user.id === this.editedDiscussion.id
       );
 
       console.log(userIndex);
-      console.log(this.editedUser);
-      this.UserList.splice(userIndex, 1, this.editedUser);
-      console.log(this.UserList);
+      console.log(this.editedDiscussion);
+      this.DiscussionList.splice(userIndex, 1, this.editedDiscussion);
+      console.log(this.DiscussionList);
       this.close();
 
       this.loading = true;
