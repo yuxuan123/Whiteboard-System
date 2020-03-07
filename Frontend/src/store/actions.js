@@ -23,6 +23,7 @@ export default {
         })
     })
   },
+
   LOGOUT({ commit }) {
     return new Promise((resolve, reject) => {
       $cookies.remove('username')
@@ -32,6 +33,7 @@ export default {
       resolve(true);
     })
   },
+  
   GETALLUSER({ commit }, pagination) {
     return new Promise((resolve, reject) => {
       const { page, rowsPerPage, sortBy, descending, search } = pagination;
@@ -88,7 +90,6 @@ export default {
         })
     })
   },
-
 
   CHANGEPASSWORD({ commit }, payload) {
     return new Promise((resolve, reject) => {

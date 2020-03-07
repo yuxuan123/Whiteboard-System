@@ -6,7 +6,7 @@
           <material-card
             color="general"
             title="Admin Dashboard"
-            text="Manage Discussions"
+            text="Manage User Accounts"
           >
             <v-spacer />
             <br />
