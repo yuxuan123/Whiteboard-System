@@ -6,7 +6,7 @@
           <material-card
             color="general"
             title="Admin Dashboard"
-            text="Manage User Accounts"
+            text="Manage Discussion Posts"
           >
             <v-spacer />
             <br />
@@ -18,35 +18,57 @@
                 <v-card-text>
                   <v-container class="pt-0" grid-list-md>
                     <v-layout wrap>
-                      <v-flex xs12 sm6 md6>
+                      <v-flex xs12 sm12 md12>
                         <v-text-field
-                          v-model="viewingDiscussion.username"
-                          label="Name"
+                          v-model="viewingDiscussion.title"
+                          label="Title"
                           readonly
                         />
                       </v-flex>
 
                       <v-flex xs12 sm6 md6>
                         <v-text-field
-                          v-model="viewingDiscussion.email"
-                          label="Email"
+                          v-model="viewingDiscussion.courseName"
+                          label="Course"
                           readonly
                         />
                       </v-flex>
 
                       <v-flex xs12 sm6 md6>
                         <v-text-field
-                          v-model="viewingDiscussion.phoneno"
-                          label="Phone Number"
+                          v-model="viewingDiscussion.courseFolderName"
+                          label="Course Folder"
                           readonly
                         />
                       </v-flex>
 
                       <v-flex xs12 sm6 md6>
                         <v-text-field
-                          v-model="viewingDiscussion.role"
-                          label="Role"
+                          v-model="viewingDiscussion.createdOn"
+                          label="Created On"
                           readonly
+                        />
+                      </v-flex>
+
+                      <v-flex xs12 sm6 md6>
+                        <v-text-field
+                          v-model="viewingDiscussion.userName"
+                          label="Created By"
+                          readonly
+                        />
+                      </v-flex>
+
+                      <v-flex
+                        xs12
+                        sm12
+                        md12
+                        class="viewEditor"
+                        style="margin-top:10px;"
+                      >
+                        <ckeditor
+                          v-model="viewingDiscussion.description"
+                          disabled
+                          :editor="editor"
                         />
                       </v-flex>
                     </v-layout>
@@ -67,7 +89,7 @@
             <v-dialog v-model="dialog" max-width="1000px">
               <template v-slot:activator="{ on }">
                 <v-btn color="general" dark v-on="on">
-                  New User
+                  New Discussion
                 </v-btn>
               </template>
 
@@ -79,33 +101,35 @@
                   <v-form ref="createform">
                     <v-container class="pt-0" grid-list-md>
                       <v-layout wrap>
-                        <v-flex xs12 sm6 md6>
+                        <v-flex xs12 sm12 md12>
                           <v-text-field
-                            v-model="editedDiscussion.username"
-                            label="Name"
-                            :readonly="isViewing"
+                            v-model="editedDiscussion.title"
+                            label="Title"
+                            required
                           />
                         </v-flex>
                         <v-flex xs12 sm6 md6>
-                          <v-text-field
-                            v-model="editedDiscussion.email"
-                            label="Email"
-                            :readonly="isViewing"
+                          <v-select
+                            v-model="editedDiscussion.courseId"
+                            :items="courses"
+                            item-text="courseName"
+                            item-value="courseId"
+                            label="Course"
                           />
                         </v-flex>
                         <v-flex xs12 sm6 md6>
-                          <v-text-field
-                            v-model="editedDiscussion.phoneno"
-                            label="Phone No"
-                            :readonly="isViewing"
+                          <v-select
+                            v-model="editedDiscussion.courseFolderId"
+                            :items="courseFolders"
+                            item-text="name"
+                            item-value="courseFolderId"
+                            label="Course Folder"
                           />
                         </v-flex>
-
-                        <v-flex xs6 sm6 md6>
-                          <v-text-field
-                            v-model="editedDiscussion.role"
-                            label="Role"
-                            :readonly="isViewing"
+                        <v-flex xs12 sm12 md12>
+                          <ckeditor
+                            v-model="editedDiscussion.description"
+                            :editor="editor"
                           />
                         </v-flex>
                       </v-layout>
@@ -119,7 +143,7 @@
                     Cancel
                   </v-btn>
                   <v-btn
-                    v-if="!this.isViewing"
+                    v-if="!isViewing"
                     color="blue darken-1"
                     flat
                     @click="save"
@@ -158,10 +182,14 @@
                 />
               </template>
               <template slot="items" slot-scope="props">
-                <td>{{ props.item.username }}</td>
-                <td>{{ props.item.email }}</td>
-                <td>{{ props.item.phoneno }}</td>
-                <td>{{ props.item.role }}</td>
+                <td>{{ props.item.title }}</td>
+                <td>{{ props.item.description }}</td>
+                <td>{{ props.item.courseName }}</td>
+                <td>{{ props.item.courseFolderName }}</td>
+                <td>{{ props.item.userName }}</td>
+                <td>
+                  {{ props.item.createdOn }}
+                </td>
                 <td>
                   <v-layout align-center justify-center>
                     <v-card-actions>
@@ -169,7 +197,7 @@
                         flat
                         icon
                         color="blue lighten-1"
-                        @click="viewUser(props.item)"
+                        @click="viewDiscussion(props.item)"
                       >
                         <v-icon size="20" color="blue lighten-1">
                           mdi-eye
@@ -179,7 +207,7 @@
                         flat
                         icon
                         color="blue lighten-1"
-                        @click="editUser(props.item)"
+                        @click="editDiscussion(props.item)"
                       >
                         <v-icon size="20" color="blue lighten-1">
                           edit
@@ -189,17 +217,7 @@
                         flat
                         icon
                         color="blue lighten-1"
-                        @click="emailUser(props.item)"
-                      >
-                        <v-icon size="20" color="blue lighten-1">
-                          mdi-email
-                        </v-icon>
-                      </v-btn>
-                      <v-btn
-                        flat
-                        icon
-                        color="blue lighten-1"
-                        @click="deleteUser(props.item)"
+                        @click="deleteDiscussion(props.item)"
                       >
                         <v-icon size="20" color="blue lighten-1">
                           delete
@@ -215,7 +233,7 @@
       </v-flex>
     </v-layout>
     <v-snackbar v-model="snackbar" :color="color" :top="true">
-      {{ errorMessages }}
+      {{ message }}
       <v-btn dark flat @click="snackbar = false">
         Close
       </v-btn>
@@ -224,47 +242,71 @@
 </template>
 
 <script>
+import moment from "moment";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+
 export default {
   data: () => ({
+    editor: ClassicEditor,
+    editorConfig: {
+      toolbar: {
+        items: [
+          "heading",
+          "|",
+          "bold",
+          "italic",
+          "link",
+          "bulletedList",
+          "numberedList",
+          "undo",
+          "redo"
+        ]
+      }
+    },
     loading: false,
     isViewing: false,
     discussionDialog: false,
     search: "",
     pagination: {
+      search: "",
       page: 1,
       rowsPerPage: 5,
-      sortBy: "",
+      sortBy: "title",
       descending: true,
       rowsPerPageItems: [5, 10, 15],
-      totalItems: 0,
-      search: "",
+      totalItems: 0
     },
-    DiscussionList: [
-      {
-        postId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        courseId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        title: "alan@gmail.com",
-        description: "Testing here 123",
-        createdBy: "2020-03-04T06:29:03.565Z",
-        createdOn: "2020-03-04T06:29:03.565Z"
-      }
-    ],
+    DiscussionList: [],
+    courses: [],
+    courseFolders: [],
     dialog: false,
     headers: [
       {
-        text: "Username",
-        value: "username"
+        text: "Title",
+        value: "title"
       },
-      { text: "Email", value: "email" },
+      { text: "Description", value: "description" },
       {
-        text: "Phone Number",
-        value: "phoneno",
+        text: "Course Name",
+        value: "courseName",
         filterable: false,
         sortable: false
       },
       {
-        text: "Role",
-        value: "role"
+        text: "Course Folder",
+        value: "courseFolderName",
+        filterable: false,
+        sortable: false
+      },
+      {
+        text: "Created By",
+        value: "userName",
+        filterable: false,
+        sortable: false
+      },
+      {
+        text: "Created On",
+        value: "createdOn"
       },
       {
         text: "Actions",
@@ -278,17 +320,17 @@ export default {
     editedIndex: -1,
     editedDiscussion: {},
     viewingDiscussion: {},
-    errorMessages: "",
     snackbar: false,
-    color: "general"
+    color: "general",
+    message: ""
   }),
   computed: {
     formTitle() {
       return this.editedIndex === -1
-        ? "New User"
+        ? "New Discussion"
         : this.editedIndex === -2
-        ? "View User"
-        : "Edit User";
+        ? "View Discussion"
+        : "Edit Discussion";
     }
   },
   watch: {
@@ -302,64 +344,123 @@ export default {
 
     pagination: {
       handler() {
-        this.getUsers();
+        this.getPosts();
       },
       deep: true
     },
 
     search: {
       handler(input) {
-        this.searchUser(input);
+        this.searchPosts(input);
       }
     }
   },
+  created() {
+    //Get the list of courses first
+    //For Dropdownlist
+    this.$store
+      .dispatch("GETALLCOURSES")
+      .then(response => {
+        this.courses = response.data;
+      })
+      .catch(err => {
+        this.snackbar = true;
+        this.color = "error";
+        this.message = "Error, Please try again later";
+      });
 
+    this.$store
+      .dispatch("GETALLCOURSEFOLDERS")
+      .then(response => {
+        this.courseFolders = response.data;
+      })
+      .catch(err => {
+        this.snackbar = true;
+        this.color = "error";
+        this.message = "Error, Please try again later";
+      });
+  },
   methods: {
-    getUsers() {
+    getCourseName(courseId) {
+      return this.courses.find(x => x.courseId).courseName;
+    },
+    getCourseFolderName(courseFolderId) {
+      return this.courseFolders.find(x => x.courseFolderId).name;
+    },
+    getPosts() {
       this.loading = true;
+      //Pass Search value into pagination object
+      this.pagination.search = this.search;
       this.$store
-        .dispatch("GETALLUSER", this.pagination)
+        .dispatch("GETALLPOST", this.pagination)
         .then(response => {
+          this.loading = false;
           console.log(response);
+          this.DiscussionList = response.data;
+          //Make the datetime more readable
+          for (var i = 0; i < this.DiscussionList.length; i++) {
+            this.DiscussionList[i].createdOn = moment(
+              this.DiscussionList[i].createdOn
+            ).format("DD/MM/YY HH:mm:ss");
+            if (
+              this.DiscussionList[i].hasOwnProperty("courseId") &&
+              this.DiscussionList[i].courseId != null
+            ) {
+              this.DiscussionList[i].courseName = this.getCourseName(
+                this.DiscussionList[i].courseId
+              );
+            }
+            if (this.DiscussionList[i].courseFolderId.length != 0) {
+              this.DiscussionList[
+                i
+              ].courseFolderName = this.getCourseFolderName(
+                this.DiscussionList[i].courseFolderId[0]
+              );
+            }
+          }
+          this.pagination.totalItems = response.data.length;
         })
         .catch(err => {
           this.snackbar = true;
           this.color = "error";
           this.message = "Error, Please try again later";
         });
-      this.pagination.totalItems = this.DiscussionList.length;
     },
 
-    editUser(user) {
-      this.editedIndex = this.DiscussionList.indexOf(user);
-      this.editedDiscussion = Object.assign({}, user);
-      this.dialog = true;
+    searchPosts(input) {
+      if (input.length > 3 || input.length == 0) {
+        //API Call
+        this.getPosts();
+      }
     },
 
-    viewUser(user) {
+    viewDiscussion(discussion) {
       this.editedIndex = -2;
-      this.viewingDiscussion = Object.assign({}, user);
+      this.viewingDiscussion = Object.assign({}, discussion);
+      if (
+        this.viewingDiscussion.hasOwnProperty("courseId") &&
+        this.viewingDiscussion.courseId != null
+      ) {
+        var courseName = this.getCourseName(this.viewingDiscussion.courseId);
+        this.viewingDiscussion.courseName = courseName;
+      }
+      if (
+        this.viewingDiscussion.hasOwnProperty("courseFolderId") &&
+        this.viewingDiscussion.courseFolderId != null
+      ) {
+        var courseFolderName = this.getCourseFolderName(
+          this.viewingDiscussion.courseFolderId
+        );
+        this.viewingDiscussion.courseFolderName = courseFolderName;
+      }
       this.discussionDialog = true;
     },
-    emailUser(user) {
-      var answer = window.confirm("Send activation email?");
-      if (answer) {
-        //Send Activation Email
-      }
-    },
-    deleteUser(user) {
-      var answer = window.confirm("Confirm delete user?");
-      if (answer) {
-        this.loading = true;
-        let userIndex = this.DiscussionList.findIndex(
-          item => item.id === user.id
-        );
-        if (~userIndex) {
-          this.DiscussionList.splice(userIndex, 1);
-          this.loading = false;
-        }
-        this.pagination.totalItems = this.DiscussionList.length;
-      }
+
+    editDiscussion(discussion) {
+      this.editedIndex = this.DiscussionList.indexOf(discussion);
+      this.editedDiscussion = Object.assign({}, discussion);
+      this.editedDiscussion.courseFolderId = this.editedDiscussion.courseFolderId[0];
+      this.dialog = true;
     },
 
     close() {
@@ -382,38 +483,106 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
-        this.submitEditUser();
+        this.submitEditDiscussion();
       } else {
-        this.createUser();
+        this.createDiscussion();
       }
     },
 
-    createUser() {
+    createDiscussion() {
+      //Add all the required fields before passing it over
+      this.editedDiscussion.createdBy = $cookies.get("userid");
+      this.editedDiscussion.createdOn = moment(new Date()).utc();
+      this.editedDiscussion.userName = $cookies.get("username");
+      var id = this.editedDiscussion.courseFolderId;
+
+      this.editedDiscussion.courseFolderId = [];
+      this.editedDiscussion.courseFolderId.push(id);
+      var item = this.editedDiscussion;
+      delete item.courseName;
+      delete item.courseFolderName;
+      console.log(item);
+      //console.log(this.editedDiscussion);
+      this.editedDiscussion = this.$store
+        .dispatch("CREATEDISCUSSION", item)
+        .then(response => {
+          this.DiscussionList.push(this.editedDiscussion);
+          this.pagination.totalItems = this.DiscussionList.length;
+        })
+        .catch(err => {
+          this.snackbar = true;
+          this.color = "error";
+          this.message = "Create Error, Please try again later";
+        });
+      this.close();
       this.DiscussionList.push(this.editedDiscussion);
       this.pagination.totalItems = this.DiscussionList.length;
       this.close();
     },
 
-    submitEditUser() {
-      let userIndex = this.DiscussionList.findIndex(
-        user => user.id === this.editedDiscussion.id
-      );
-
-      console.log(userIndex);
-      console.log(this.editedDiscussion);
-      this.DiscussionList.splice(userIndex, 1, this.editedDiscussion);
-      console.log(this.DiscussionList);
+    submitEditDiscussion() {
+      var edited = this.editedDiscussion;
+      var courseFolderId = edited.courseFolderId;
+      edited.courseFolderId = [];
+      edited.courseFolderId.push(courseFolderId);
+      edited.createdOn = moment(new Date()).utc();
+      console.log(edited);
+      this.$store
+        .dispatch("UPDATEDISCUSSION", edited)
+        .then(response => {
+          let discussionIndex = this.DiscussionList.findIndex(
+            discussionIndex =>
+              discussion.postId === this.editedDiscussion.postId
+          );
+          this.DiscussionList.splice(discussionIndex, 1, this.editedDiscussion);
+          this.pagination.totalItems = this.DiscussionList.length;
+        })
+        .catch(err => {
+          this.snackbar = true;
+          this.color = "error";
+          this.message = "Update Error, Please try again later";
+        });
       this.close();
-
-      this.loading = true;
     },
 
-    searchUser(input) {
-      if (input.length > 2) {
-        //API Call
-        console.log(input);
+    deleteDiscussion(discussion) {
+      var answer = window.confirm(
+        "Confirm delete Discussion Post? All replies made to the thread will be removed too"
+      );
+      if (answer) {
+        this.$store
+          .dispatch("DELETEDISCUSSION", discussion)
+          .then(response => {
+            this.loading = true;
+            let discussionIndex = this.DiscussionList.findIndex(
+              item => item.postId === discussion.postId
+            );
+            if (~discussionIndex) {
+              this.DiscussionList.splice(discussionIndex, 1);
+              this.loading = false;
+            }
+            this.pagination.totalItems = this.DiscussionList.length;
+          })
+          .catch(err => {
+            this.snackbar = true;
+            this.color = "error";
+            this.message = "Error, Please try again later";
+          });
       }
     }
   }
 };
 </script>
+<style>
+.viewEditor .ck-sticky-panel__content {
+  display: none;
+}
+
+.ck-editor__editable {
+  min-height: 200px;
+}
+
+.ck.ck-toolbar {
+  display: block !important;
+}
+</style>

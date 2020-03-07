@@ -33,17 +33,17 @@ export default {
       resolve(true);
     })
   },
-  
+
+  /* User.vue */
   GETALLUSER({ commit }, pagination) {
     return new Promise((resolve, reject) => {
       const { page, rowsPerPage, sortBy, descending, search } = pagination;
       //Apply asc/desc to sorting Name
+      var sortingName = sortBy;
       if (descending != true && descending != undefined) {
-        sortBy = sortBy + " desc";
+        sortingName = sortBy + " desc";
       }
-      // Removed Params for now. Waiting for Cors
-      // { params: { PageNumber: page, PageSize: rowsPerPage, OrderBy: sortBy, keyword: search } }
-      axios.get(API_URL + '/getAllUsers')
+      axios.get(API_URL + '/getAllUsers', { params: { PageNumber: page, PageSize: rowsPerPage, OrderBy: sortingName, keyword: search } })
         .then(response => {
           resolve(response)
         })
@@ -53,7 +53,7 @@ export default {
     })
   },
 
-  CREATEUSER({ commit }, user){
+  CREATEUSER({ commit }, user) {
     //Hardcode Password
     user.password = "user1234!";
     return new Promise((resolve, reject) => {
@@ -67,7 +67,7 @@ export default {
     })
   },
 
-  UPDATEUSER({ commit }, user){
+  UPDATEUSER({ commit }, user) {
     return new Promise((resolve, reject) => {
       axios.put(API_URL + '/' + user.userId, user)
         .then(response => {
@@ -79,11 +79,92 @@ export default {
     })
   },
 
-  DELETEUSER({ commit }, user){
+  DELETEUSER({ commit }, user) {
     return new Promise((resolve, reject) => {
       axios.delete(API_URL + '/' + user.userId, user)
         .then(response => {
           resolve(true)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  /* Post.vue */
+  GETALLPOST({ commit }, pagination) {
+    return new Promise((resolve, reject) => {
+      const { page, rowsPerPage, sortBy, descending, search } = pagination;
+      //Apply asc/desc to sorting Name
+      if (descending != true && descending != undefined) {
+        sortBy = sortBy + " desc";
+      }
+      // Removed Params for now. Waiting for Cors
+      // { params: { PageNumber: page, PageSize: rowsPerPage, OrderBy: sortBy, keyword: search } }
+      axios.get(API_URL + '/getAllPosts', { params: { PageNumber: page, PageSize: rowsPerPage, OrderBy: sortBy, keyword: search } })
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  CREATEDISCUSSION({ commit }, discussion) {
+    return new Promise((resolve, reject) => {
+      axios.post(API_URL + '/createPost', discussion)
+        .then(response => {
+          resolve(true)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  UPDATEDISCUSSION({commit}, discussion){
+    return new Promise((resolve, reject) => {
+      axios.post(API_URL + '/updatePost', discussion)
+        .then(response => {
+          resolve(true)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  DELETEDISCUSSION({ commit }, discussion) {
+    return new Promise((resolve, reject) => {
+      axios.delete(API_URL + '/deletePost/' + discussion.postId)
+        .then(response => {
+          resolve(true)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  /* Discussion.vue */
+  GETALLCOURSES({ commit }) {
+    return new Promise((resolve, reject) => {
+      axios.get(API_URL + '/getAllCourses')
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  GETALLCOURSEFOLDERS({ commit }) {
+    return new Promise((resolve, reject) => {
+      axios.get(API_URL + '/getAllCourseFolders')
+        .then(response => {
+          resolve(response)
         })
         .catch(err => {
           reject(err)

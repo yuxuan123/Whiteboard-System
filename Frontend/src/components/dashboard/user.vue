@@ -115,7 +115,7 @@
                     Cancel
                   </v-btn>
                   <v-btn
-                    v-if="!this.isViewing"
+                    v-if="!isViewing"
                     color="blue darken-1"
                     flat
                     @click="save"
@@ -128,7 +128,7 @@
 
             <v-flex xs12 sm12 md12>
               <v-text-field
-                v-model.lazy="pagination.search"
+                v-model.lazy="search"
                 class="mb-2"
                 append-icon="search"
                 label="Search"
@@ -225,11 +225,12 @@ export default {
     loading: false,
     isViewing: false,
     userDialog: false,
+    search: "",
     pagination: {
       search: "",
       page: 1,
       rowsPerPage: 5,
-      sortBy: "name",
+      sortBy: "username",
       descending: true,
       rowsPerPageItems: [5, 10, 15],
       totalItems: 0
@@ -303,12 +304,14 @@ export default {
   methods: {
     getUsers() {
       this.loading = true;
+      //Pass Search value into pagination object
+      this.pagination.search = this.search;
       this.$store
         .dispatch("GETALLUSER", this.pagination)
         .then(response => {
           this.loading = false;
-          this.UserList = response.data;
-          this.pagination.totalItems = response.data.length;
+          this.UserList = response.data.userDtos;
+          // console.log(response.headers.content-type);
         })
         .catch(err => {
           this.snackbar = true;
@@ -318,7 +321,7 @@ export default {
     },
 
     searchUser(input) {
-      if (input.length > 2) {
+      if (input.length > 3 || input.length == 0) {
         //API Call
         this.getUsers();
       }
@@ -384,6 +387,7 @@ export default {
     },
 
     submitEditUser() {
+      //console.log(this.editedUser);
       this.$store
         .dispatch("UPDATEUSER", this.editedUser)
         .then(response => {

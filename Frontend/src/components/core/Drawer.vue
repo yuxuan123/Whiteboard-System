@@ -9,8 +9,15 @@
     mobile-break-point="991"
     width="260"
   >
-    <v-img :src="image" height="100%">
-      <v-layout class="fill-height" tag="v-list" column>
+    <v-img
+      :src="image"
+      height="100%"
+    >
+      <v-layout
+        class="fill-height"
+        tag="v-list"
+        column
+      >
         <router-link to="/">
           <v-img
             :src="logo"
