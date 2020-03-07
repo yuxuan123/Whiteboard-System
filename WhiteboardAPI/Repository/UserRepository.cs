@@ -45,10 +45,11 @@ namespace WhiteboardAPI.Repository
 
         public UserDE Create(UserCreationDto user)
         {
-            // validation
+            // default password when admin creates a user
             if (string.IsNullOrWhiteSpace(user.Password))
-                throw new AppException("Password is required");
+                user.Password = "Password123";
 
+            // validation
             if (_context.tbl_user.Any(x => x.UserName == user.UserName))
                 throw new AppException("Username \"" + user.UserName + "\" is already taken");
 

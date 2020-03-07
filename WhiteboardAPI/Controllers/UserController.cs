@@ -82,37 +82,46 @@ namespace WhiteboardAPI.Controllers
 
         [AllowAnonymous]
         [HttpGet("getAllUsers")]
-        public IActionResult GetAllPosts([FromQuery] ResourceParameters resourceParameters)
+        public IActionResult GetAllUsers([FromQuery] ResourceParameters resourceParameters)
         {
             if (string.IsNullOrEmpty(resourceParameters.OrderBy))
                 resourceParameters.OrderBy = "Username";
 
-            var postsFromRepo = _userRepository.GetAllUsers(resourceParameters);
+            var usersFromRepo = _userRepository.GetAllUsers(resourceParameters);
 
-            if (postsFromRepo == null)
+            if (usersFromRepo == null)
             {
                 return NotFound();
             }
 
-            var previousPageLink = postsFromRepo.HasPrevious ? CreateResourceUri(resourceParameters, ResourceUriType.PreviousPage) : null;
+            IEnumerable<UserDto> userDtos = _mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
+
+            Users users = new Users
+            {
+                UserDtos = userDtos
+            };
+
+            users.TotalCount = userDtos.Count();
+
+            var previousPageLink = usersFromRepo.HasPrevious ? CreateResourceUri(resourceParameters, ResourceUriType.PreviousPage) : null;
 
             var x = CreateResourceUri(resourceParameters, ResourceUriType.NextPage);
 
-            var nextPageLink = postsFromRepo.HasNext ? CreateResourceUri(resourceParameters, ResourceUriType.NextPage) : null;
+            var nextPageLink = usersFromRepo.HasNext ? CreateResourceUri(resourceParameters, ResourceUriType.NextPage) : null;
 
             var paginationMetadata = new
             {
-                totalCount = postsFromRepo.TotalCount,
-                pageSize = postsFromRepo.PageSize,
-                currentPage = postsFromRepo.CurrentPage,
-                totalPages = postsFromRepo.TotalPages,
+                totalCount = usersFromRepo.TotalCount,
+                pageSize = usersFromRepo.PageSize,
+                currentPage = usersFromRepo.CurrentPage,
+                totalPages = usersFromRepo.TotalPages,
                 previousPageLink = previousPageLink,
                 nextPageLink = nextPageLink
             };
 
             Response.Headers.Add("X-Pagination", Newtonsoft.Json.JsonConvert.SerializeObject(paginationMetadata));
 
-            return Ok(postsFromRepo);
+            return Ok(users);
         }
 
         [AllowAnonymous]

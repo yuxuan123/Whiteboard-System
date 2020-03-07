@@ -83,6 +83,11 @@ namespace WhiteboardAPI.Controllers
                 return NotFound();
             }
 
+            foreach (PostDto p in postsFromRepo)
+            {
+                p.CourseFolderId = _discussionBoardRepository.GetPostFolders(p.PostId).Select(x => x.CourseFolderId).ToList();
+            }
+
             var previousPageLink = postsFromRepo.HasPrevious ? CreateResourceUri(resourceParameters, ResourceUriType.PreviousPage) : null;
 
             var x = CreateResourceUri(resourceParameters, ResourceUriType.NextPage);
@@ -120,6 +125,8 @@ namespace WhiteboardAPI.Controllers
                 var postFromRepo = _discussionBoardRepository.CreatePost(postDto);
 
                 var postToReturn = _mapper.Map<PostDto>(postFromRepo);
+
+                postToReturn.CourseFolderId = _discussionBoardRepository.GetPostFolders(postToReturn.PostId).Select(x => x.CourseFolderId).ToList();
 
                 return Ok(postToReturn);
             }
@@ -323,6 +330,22 @@ namespace WhiteboardAPI.Controllers
                 // return error message if there was an exception
                 return BadRequest(new { message = ex.Message });
             }
+        }
+
+        [AllowAnonymous]
+        [HttpGet("getAllCourseFolders")]
+        public IActionResult GetAllGourseFolders()
+        {
+            var foldersFromRepo = _discussionBoardRepository.GetAllCourseFolders();
+
+            if (foldersFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            var folderDtos = _mapper.Map<IEnumerable<CourseFolderDto>>(foldersFromRepo);
+
+            return Ok(folderDtos);
         }
 
         [AllowAnonymous]
