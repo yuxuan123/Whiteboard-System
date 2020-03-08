@@ -311,6 +311,8 @@ export default {
         .then(response => {
           this.loading = false;
           this.UserList = response.data.userDtos;
+          var xpg = JSON.parse(response.headers['x-pagination']);
+          this.pagination.totalItems = xpg['totalCount'];
           // console.log(response.headers.content-type);
         })
         .catch(err => {

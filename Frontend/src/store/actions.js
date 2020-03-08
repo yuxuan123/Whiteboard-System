@@ -55,7 +55,7 @@ export default {
 
   CREATEUSER({ commit }, user) {
     //Hardcode Password
-    user.password = "user1234!";
+    //user.password = "user1234!";
     return new Promise((resolve, reject) => {
       axios.post(API_URL + '/createUser', user)
         .then(response => {
