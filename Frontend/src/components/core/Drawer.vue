@@ -120,15 +120,17 @@ export default {
   },
   created: function() {
     var role = $cookies.get("role");
-    if (role !== "user") {
+    if (role == "student") {
       // Hide sidebar tabs that is not related to user
-      // var itemIndex = this.links.findIndex(x => x.name === "Name");
-      // this.links.splice(itemIndex, 1);
+      var userIndex = this.links.findIndex(x => x.name === "Manage Users");
+      this.links.splice(userIndex, 1);
+      var discountIndex = this.links.findIndex(x => x.name === "Manage Posts");
+      this.links.splice(discountIndex, 1);
     }
-    if (role != "admin") {
-      // Hide sidebar tabs that is not related to admin
-      // var itemIndex = this.links.findIndex(x => x.name === "Name");
-      // this.links.splice(itemIndex, 1);
+    if (role == "admin") {
+      // Remove all tabs before Manage Users
+      var userIndex = this.links.findIndex(x => x.name === "Manage Users");
+      this.links = this.links.slice(userIndex, this.links.length);
     }
   },
   mounted() {
@@ -166,7 +168,7 @@ export default {
     top: 30px;
     height: 30px;
     width: 220px;
-    left:50px;
+    left: 50px;
   }
 
   .container {

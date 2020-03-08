@@ -4,8 +4,19 @@
  * official documentation https://router.vuejs.org/en/
  */
 import store from '../store'
-// import axios from 'axios'
-// import Cookies from 'js-cookie'
+import Cookies from 'js-cookie'
+
+//Check from cookies if the role is admin
+//If yes, enable routing to the page
+const checkAdmin = (to, from, next) => {
+  var role = Cookies.get('role');
+  if (role === 'admin') {
+    next()
+  }
+  else {
+    next('/')
+  }
+}
 
 export default [
   {
@@ -28,9 +39,21 @@ export default [
     path: '/',
     component: () =>
       import(/* webpackChunkName: "routes" */ `@/views/LoginView.vue`),
+    // redirect if already signed in
+    beforeEnter: (to, from, next) => {
+      if (Cookies.get('authenticated')) {
+        next("/dashboard");
+      } else {
+        next();
+      }
+    },
     children: [
       {
         path: '',
+        component: () => import(`@/components/auth/Login.vue`),
+      },
+      {
+        path: 'login',
         component: () => import(`@/components/auth/Login.vue`)
       },
       {
@@ -53,6 +76,7 @@ export default [
         path: "",
         meta: {
           name: "Announcements",
+          requiresAuth: true
         },
         component: () => import(`@/components/dashboard/announcement.vue`)
       },
@@ -60,44 +84,52 @@ export default [
         path: "announcement",
         meta: {
           name: "Announcement",
+          requiresAuth: true
         },
         component: () => import(`@/components/dashboard/announcement.vue`)
-      },   
+      },
       {
         path: "discussion",
         meta: {
           name: "Discussion",
+          requiresAuth: true
         },
         component: () => import(`@/components/dashboard/discussion.vue`)
-      },        
+      },
       {
         path: "course",
         meta: {
           name: "Course Material",
+          requiresAuth: true
         },
         component: () => import(`@/components/dashboard/course.vue`)
-      },  
+      },
       {
         path: "lecture",
         meta: {
           name: "Live Lecture",
+          requiresAuth: true
         },
         component: () => import(`@/components/dashboard/lecture.vue`)
       },
       {
         path: "user",
         meta: {
-          name: "Manager User",
+          name: "Manage User",
+          requiresAuth: true
         },
+        beforeEnter: checkAdmin,
         component: () => import(`@/components/dashboard/user.vue`)
       },
       {
         path: "post",
         meta: {
-          name: "Manager Posts",
+          name: "Manage Posts",
+          requiresAuth: true
         },
+        beforeEnter: checkAdmin,
         component: () => import(`@/components/dashboard/post.vue`)
-      },                  
+      },
     ]
   }
 ]

@@ -3,6 +3,7 @@ import VueAnalytics from 'vue-analytics'
 import Router from 'vue-router'
 // import store from '../store'
 import Meta from 'vue-meta'
+import Cookies from 'js-cookie'
 
 // Routes
 import paths from './paths'
@@ -23,6 +24,20 @@ const router = new Router({
       return { selector: to.hash }
     }
     return { x: 0, y: 0 }
+  }
+})
+
+// Route guard checks to see if you are logged in, if not reroutes to login
+// to is where you are going, matched.some is to find which routes have requiresAuth
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (Cookies.get('authenticated')) {
+      next()
+      return
+    }
+    next('/')
+  } else {
+    next()
   }
 })
 
