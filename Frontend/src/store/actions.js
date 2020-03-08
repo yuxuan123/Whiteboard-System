@@ -96,8 +96,9 @@ export default {
     return new Promise((resolve, reject) => {
       const { page, rowsPerPage, sortBy, descending, search } = pagination;
       //Apply asc/desc to sorting Name
+      var sortingName = sortBy;
       if (descending != true && descending != undefined) {
-        sortBy = sortBy + " desc";
+        sortingName = sortBy + " desc";
       }
       // Removed Params for now. Waiting for Cors
       // { params: { PageNumber: page, PageSize: rowsPerPage, OrderBy: sortBy, keyword: search } }
