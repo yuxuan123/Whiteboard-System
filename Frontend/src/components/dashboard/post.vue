@@ -382,10 +382,11 @@ export default {
   },
   methods: {
     getCourseName(courseId) {
-      return this.courses.find(x => x.courseId).courseName;
+      return this.courses.find(x => x.courseId === courseId).courseName;
     },
     getCourseFolderName(courseFolderId) {
-      return this.courseFolders.find(x => x.courseFolderId).name;
+      return this.courseFolders.find(x => x.courseFolderId === courseFolderId)
+        .name;
     },
     getPosts() {
       this.loading = true;
@@ -395,7 +396,6 @@ export default {
         .dispatch("GETALLPOST", this.pagination)
         .then(response => {
           this.loading = false;
-          console.log(response);
           this.DiscussionList = response.data;
           //Make the datetime more readable
           for (var i = 0; i < this.DiscussionList.length; i++) {
@@ -418,7 +418,8 @@ export default {
               );
             }
           }
-          this.pagination.totalItems = response.data.length;
+          var xpg = JSON.parse(response.headers["x-pagination"]);
+          this.pagination.totalItems = xpg["totalCount"];
         })
         .catch(err => {
           this.snackbar = true;
@@ -449,7 +450,7 @@ export default {
         this.viewingDiscussion.courseFolderId != null
       ) {
         var courseFolderName = this.getCourseFolderName(
-          this.viewingDiscussion.courseFolderId
+          this.viewingDiscussion.courseFolderId[0]
         );
         this.viewingDiscussion.courseFolderName = courseFolderName;
       }
@@ -492,7 +493,7 @@ export default {
     createDiscussion() {
       //Add all the required fields before passing it over
       this.editedDiscussion.createdBy = $cookies.get("userid");
-      this.editedDiscussion.createdOn = moment(new Date()).utc();
+      this.editedDiscussion.createdOn = moment(new Date());
       this.editedDiscussion.userName = $cookies.get("username");
       var id = this.editedDiscussion.courseFolderId;
 
@@ -501,8 +502,7 @@ export default {
       var item = this.editedDiscussion;
       delete item.courseName;
       delete item.courseFolderName;
-      console.log(item);
-      //console.log(this.editedDiscussion);
+
       this.editedDiscussion = this.$store
         .dispatch("CREATEDISCUSSION", item)
         .then(response => {
@@ -521,20 +521,26 @@ export default {
     },
 
     submitEditDiscussion() {
+      //Get the course folder id and name
+      //Update on another variable then pass back to table
       var edited = this.editedDiscussion;
-      var courseFolderId = edited.courseFolderId;
+      var courseFolderId = this.editedDiscussion.courseFolderId;
+      var courseFolderName = this.getCourseFolderName(courseFolderId);
+      edited.courseFolderName = courseFolderName;
       edited.courseFolderId = [];
       edited.courseFolderId.push(courseFolderId);
-      edited.createdOn = moment(new Date()).utc();
-      console.log(edited);
+      edited.createdOn = moment(this.editedDiscussion.createdOn).toDate();
+
       this.$store
         .dispatch("UPDATEDISCUSSION", edited)
         .then(response => {
           let discussionIndex = this.DiscussionList.findIndex(
-            discussionIndex =>
-              discussion.postId === this.editedDiscussion.postId
+            discussion => discussion.postId === edited.postId
           );
-          this.DiscussionList.splice(discussionIndex, 1, this.editedDiscussion);
+           edited.createdOn = moment(
+             edited.createdOn
+            ).format("DD/MM/YY HH:mm:ss");
+          this.DiscussionList.splice(discussionIndex, 1, edited);
           this.pagination.totalItems = this.DiscussionList.length;
         })
         .catch(err => {

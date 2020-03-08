@@ -311,9 +311,8 @@ export default {
         .then(response => {
           this.loading = false;
           this.UserList = response.data.userDtos;
-          var xpg = JSON.parse(response.headers['x-pagination']);
-          this.pagination.totalItems = xpg['totalCount'];
-          // console.log(response.headers.content-type);
+          var xpg = JSON.parse(response.headers["x-pagination"]);
+          this.pagination.totalItems = xpg["totalCount"];
         })
         .catch(err => {
           this.snackbar = true;
@@ -389,14 +388,16 @@ export default {
     },
 
     submitEditUser() {
-      //console.log(this.editedUser);
+      //Save editedUser out to a temp var
+      //To replace in the table after update
+      var editedUser = this.editedUser;
       this.$store
         .dispatch("UPDATEUSER", this.editedUser)
         .then(response => {
           let userIndex = this.UserList.findIndex(
-            user => user.id === this.editedUser.userId
+            user => user.userId === editedUser.userId
           );
-          this.UserList.splice(userIndex, 1, this.editedUser);
+          this.UserList.splice(userIndex, 1, editedUser);
           this.pagination.totalItems = this.UserList.length;
         })
         .catch(err => {
