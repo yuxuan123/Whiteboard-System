@@ -1,6 +1,14 @@
 <template>
-  <v-container fill-height fluid grid-list-xl>
-    <v-layout align-center justify-center wrap>
+  <v-container
+    fill-height
+    fluid
+    grid-list-xl
+  >
+    <v-layout
+      align-center
+      justify-center
+      wrap
+    >
       <v-flex md12>
         <div>
           <material-card
@@ -9,16 +17,26 @@
             text="Manage Discussion Posts"
           >
             <v-spacer />
-            <br />
-            <v-dialog v-model="discussionDialog" max-width="1000px">
+            <br>
+            <v-dialog
+              v-model="discussionDialog"
+              max-width="1000px"
+            >
               <v-card>
                 <v-card-title>
                   <span class="headline">{{ formTitle }}</span>
                 </v-card-title>
                 <v-card-text>
-                  <v-container class="pt-0" grid-list-md>
+                  <v-container
+                    class="pt-0"
+                    grid-list-md
+                  >
                     <v-layout wrap>
-                      <v-flex xs12 sm12 md12>
+                      <v-flex
+                        xs12
+                        sm12
+                        md12
+                      >
                         <v-text-field
                           v-model="viewingDiscussion.title"
                           label="Title"
@@ -26,7 +44,11 @@
                         />
                       </v-flex>
 
-                      <v-flex xs12 sm6 md6>
+                      <v-flex
+                        xs12
+                        sm6
+                        md6
+                      >
                         <v-text-field
                           v-model="viewingDiscussion.courseName"
                           label="Course"
@@ -34,7 +56,11 @@
                         />
                       </v-flex>
 
-                      <v-flex xs12 sm6 md6>
+                      <v-flex
+                        xs12
+                        sm6
+                        md6
+                      >
                         <v-text-field
                           v-model="viewingDiscussion.courseFolderName"
                           label="Course Folder"
@@ -42,7 +68,11 @@
                         />
                       </v-flex>
 
-                      <v-flex xs12 sm6 md6>
+                      <v-flex
+                        xs12
+                        sm6
+                        md6
+                      >
                         <v-text-field
                           v-model="viewingDiscussion.createdOn"
                           label="Created On"
@@ -50,7 +80,11 @@
                         />
                       </v-flex>
 
-                      <v-flex xs12 sm6 md6>
+                      <v-flex
+                        xs12
+                        sm6
+                        md6
+                      >
                         <v-text-field
                           v-model="viewingDiscussion.userName"
                           label="Created By"
@@ -86,9 +120,16 @@
                 </v-card-text>
               </v-card>
             </v-dialog>
-            <v-dialog v-model="dialog" max-width="1000px">
+            <v-dialog
+              v-model="dialog"
+              max-width="1000px"
+            >
               <template v-slot:activator="{ on }">
-                <v-btn color="general" dark v-on="on">
+                <v-btn
+                  color="general"
+                  dark
+                  v-on="on"
+                >
                   New Discussion
                 </v-btn>
               </template>
@@ -99,16 +140,27 @@
                     <span class="headline">{{ formTitle }}</span>
                   </v-card-title>
                   <v-form ref="createform">
-                    <v-container class="pt-0" grid-list-md>
+                    <v-container
+                      class="pt-0"
+                      grid-list-md
+                    >
                       <v-layout wrap>
-                        <v-flex xs12 sm12 md12>
+                        <v-flex
+                          xs12
+                          sm12
+                          md12
+                        >
                           <v-text-field
                             v-model="editedDiscussion.title"
                             label="Title"
                             required
                           />
                         </v-flex>
-                        <v-flex xs12 sm6 md6>
+                        <v-flex
+                          xs12
+                          sm6
+                          md6
+                        >
                           <v-select
                             v-model="editedDiscussion.courseId"
                             :items="courses"
@@ -117,7 +169,11 @@
                             label="Course"
                           />
                         </v-flex>
-                        <v-flex xs12 sm6 md6>
+                        <v-flex
+                          xs12
+                          sm6
+                          md6
+                        >
                           <v-select
                             v-model="editedDiscussion.courseFolderId"
                             :items="courseFolders"
@@ -126,7 +182,11 @@
                             label="Course Folder"
                           />
                         </v-flex>
-                        <v-flex xs12 sm12 md12>
+                        <v-flex
+                          xs12
+                          sm12
+                          md12
+                        >
                           <ckeditor
                             v-model="editedDiscussion.description"
                             :editor="editor"
@@ -139,7 +199,11 @@
 
                 <v-card-actions>
                   <v-spacer />
-                  <v-btn color="blue darken-1" flat @click="close">
+                  <v-btn
+                    color="blue darken-1"
+                    flat
+                    @click="close"
+                  >
                     Cancel
                   </v-btn>
                   <v-btn
@@ -154,7 +218,11 @@
               </v-card>
             </v-dialog>
 
-            <v-flex xs12 sm12 md12>
+            <v-flex
+              xs12
+              sm12
+              md12
+            >
               <v-text-field
                 v-model.lazy="search"
                 class="mb-2"
@@ -175,15 +243,21 @@
               class="elevation-1"
             >
               <!-- change table header background and text color(or other properties) -->
-              <template slot="headerCell" slot-scope="{ header }">
+              <template
+                slot="headerCell"
+                slot-scope="{ header }"
+              >
                 <span
                   class="subheading font-weight-light text-general text--darken-3"
                   v-text="header.text"
                 />
               </template>
-              <template slot="items" slot-scope="props">
+              <template
+                slot="items"
+                slot-scope="props"
+              >
                 <td>{{ props.item.title }}</td>
-                <td>{{ props.item.description }}</td>
+                <td>{{ stripHTML(props.item.description) }}</td>
                 <td>{{ props.item.courseName }}</td>
                 <td>{{ props.item.courseFolderName }}</td>
                 <td>{{ props.item.userName }}</td>
@@ -191,7 +265,10 @@
                   {{ props.item.createdOn }}
                 </td>
                 <td>
-                  <v-layout align-center justify-center>
+                  <v-layout
+                    align-center
+                    justify-center
+                  >
                     <v-card-actions>
                       <v-btn
                         flat
@@ -199,7 +276,10 @@
                         color="blue lighten-1"
                         @click="viewDiscussion(props.item)"
                       >
-                        <v-icon size="20" color="blue lighten-1">
+                        <v-icon
+                          size="20"
+                          color="blue lighten-1"
+                        >
                           mdi-eye
                         </v-icon>
                       </v-btn>
@@ -209,7 +289,10 @@
                         color="blue lighten-1"
                         @click="editDiscussion(props.item)"
                       >
-                        <v-icon size="20" color="blue lighten-1">
+                        <v-icon
+                          size="20"
+                          color="blue lighten-1"
+                        >
                           edit
                         </v-icon>
                       </v-btn>
@@ -219,7 +302,10 @@
                         color="blue lighten-1"
                         @click="deleteDiscussion(props.item)"
                       >
-                        <v-icon size="20" color="blue lighten-1">
+                        <v-icon
+                          size="20"
+                          color="blue lighten-1"
+                        >
                           delete
                         </v-icon>
                       </v-btn>
@@ -232,9 +318,17 @@
         </div>
       </v-flex>
     </v-layout>
-    <v-snackbar v-model="snackbar" :color="color" :top="true">
+    <v-snackbar
+      v-model="snackbar"
+      :color="color"
+      :top="true"
+    >
       {{ message }}
-      <v-btn dark flat @click="snackbar = false">
+      <v-btn
+        dark
+        flat
+        @click="snackbar = false"
+      >
         Close
       </v-btn>
     </v-snackbar>
@@ -244,6 +338,7 @@
 <script>
 import moment from "moment";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+var striptags = require("striptags");
 
 export default {
   data: () => ({
@@ -381,6 +476,10 @@ export default {
       });
   },
   methods: {
+    stripHTML(item) {
+      let text = striptags(item);
+      return text;
+    },
     getCourseName(courseId) {
       return this.courses.find(x => x.courseId === courseId).courseName;
     },
@@ -537,9 +636,9 @@ export default {
           let discussionIndex = this.DiscussionList.findIndex(
             discussion => discussion.postId === edited.postId
           );
-           edited.createdOn = moment(
-             edited.createdOn
-            ).format("DD/MM/YY HH:mm:ss");
+          edited.createdOn = moment(edited.createdOn).format(
+            "DD/MM/YY HH:mm:ss"
+          );
           this.DiscussionList.splice(discussionIndex, 1, edited);
           this.pagination.totalItems = this.DiscussionList.length;
         })
