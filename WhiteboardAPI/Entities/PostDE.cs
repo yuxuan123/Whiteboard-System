@@ -10,6 +10,7 @@ namespace WhiteboardAPI.Entities
         public Guid CourseId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+        public bool isEdited { get; set; }
         public DateTime CreatedOn { get; set; }
         public Guid CreatedBy { get; set; }
     }

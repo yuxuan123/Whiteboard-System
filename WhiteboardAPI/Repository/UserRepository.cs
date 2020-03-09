@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using Microsoft.Extensions.Options;
 using WhiteboardAPI.Database;
 using WhiteboardAPI.Entities;
@@ -12,14 +13,13 @@ namespace WhiteboardAPI.Repository
     public interface IUserRepository
     {
         UserDE Authenticate(string username, string password);
-        //PagedList<User> GetUsers(UserResourceParameters userResourceParameters);
+        PagedList<UserDE> GetAllUsers(ResourceParameters resourceParameters);
         UserDE Create(UserCreationDto user);
         IEnumerable<UserDE> GetUsers(List<Guid> userIds);
         UserDE GetUser(Guid userId);
-        //User GetUserByEmail(string Email);
         void UpdateUser(Guid userId, UserDE userParam);
         //void UpdatePassword(User user, string password);
-        //void DeleteUser(User user);
+        void DeleteUser(Guid userId);
         bool UserExists(Guid userId);
         bool Save();
     }
@@ -45,10 +45,11 @@ namespace WhiteboardAPI.Repository
 
         public UserDE Create(UserCreationDto user)
         {
-            // validation
+            // default password when admin creates a user
             if (string.IsNullOrWhiteSpace(user.Password))
-                throw new AppException("Password is required");
+                user.Password = "Password123";
 
+            // validation
             if (_context.tbl_user.Any(x => x.UserName == user.UserName))
                 throw new AppException("Username \"" + user.UserName + "\" is already taken");
 
@@ -82,6 +83,13 @@ namespace WhiteboardAPI.Repository
             _context.SaveChanges();
 
             return newUser;
+        }
+
+        public PagedList<UserDE> GetAllUsers(ResourceParameters resourceParameters)
+        {
+            var collectionBeforePaging = string.IsNullOrEmpty(resourceParameters.keyword) ? _context.tbl_user.OrderBy(resourceParameters.OrderBy).ToList() : _context.tbl_user.Where(x => x.UserName.Contains(resourceParameters.keyword)).OrderBy(resourceParameters.OrderBy).ToList();
+
+            return PagedList<UserDE>.Create(collectionBeforePaging, resourceParameters.PageNumber, resourceParameters.PageSize);
         }
 
         public UserDE Authenticate(string username, string password)
@@ -149,8 +157,7 @@ namespace WhiteboardAPI.Repository
 
         public void UpdateUser(Guid userId, UserDE userParam)
         {
-            IEnumerable<UserDE> users = GetUsers(new List<Guid>(new Guid[] { userId }));
-            UserDE user = users.FirstOrDefault();
+            UserDE user = GetUser(userId);
 
             if (user == null)
             {
@@ -163,6 +170,18 @@ namespace WhiteboardAPI.Repository
             user.PhoneNo = string.IsNullOrEmpty(userParam.PhoneNo) ? user.PhoneNo : userParam.PhoneNo;
 
             _context.tbl_user.Update(user);
+        }
+
+        public void DeleteUser(Guid userId)
+        {
+            UserDE user = GetUser(userId);
+
+            if (user == null)
+            {
+                throw new AppException("User not found");
+            }
+
+            _context.tbl_user.Remove(user);
         }
 
         public bool Save()

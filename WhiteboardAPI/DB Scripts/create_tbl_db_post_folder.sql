@@ -1,1 +1,1 @@
-﻿CREATE TABLE tbl_db_post_folder (    PostFolderId uniqueidentifier NOT NULL PRIMARY KEY,    PostId uniqueidentifier NOT NULL FOREIGN KEY(PostId) REFERENCES tbl_db_post(PostId),    CourseFolderId uniqueidentifier NOT NULL FOREIGN KEY(CourseFolderId) REFERENCES tbl_db_course_folder(CourseFolderId));
+﻿CREATE TABLE tbl_db_post_folder (    PostFolderId uniqueidentifier NOT NULL PRIMARY KEY,    PostId uniqueidentifier,    CourseFolderId uniqueidentifier);

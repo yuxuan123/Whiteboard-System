@@ -14,13 +14,14 @@ using WhiteboardAPI.Helpers;
 using WhiteboardAPI.Model;
 using WhiteboardAPI.Repository;
 using WhiteboardAPI.Entities;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Http;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace WhiteboardAPI.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
     [ApiController]
     public class UserController : Controller
     {
@@ -28,16 +29,99 @@ namespace WhiteboardAPI.Controllers
         private IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly AppSettings _appSettings;
-        private readonly IEmailSender _emailSender;
-        private readonly IUrlHelper _urlHelper;
+        private readonly IHttpContextAccessor _accessor;
+        private readonly LinkGenerator _generator;
 
-        public UserController(IUserRepository userRepository, IMapper mapper, IUrlHelper urlHelper, IOptions<AppSettings> appSettings, IEmailSender emailSender)
+        public UserController(IUserRepository userRepository, IMapper mapper, IOptions<AppSettings> appSettings, IHttpContextAccessor accessor, LinkGenerator generator)
         {
             _userRepository = userRepository;
             _mapper = mapper;
             _appSettings = appSettings.Value;
-            _emailSender = emailSender;
-            _urlHelper = urlHelper;
+            _accessor = accessor;
+            _generator = generator;
+        }
+        private string CreateResourceUri(ResourceParameters resourceParameters, ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return _generator.GetUriByPage(_accessor.HttpContext,
+                        handler: null,
+                        page: "/getAllUsers",
+                        values:
+                        new
+                        {
+                            orderBy = resourceParameters.OrderBy,
+                            pageNumber = resourceParameters.PageNumber - 1,
+                            pageSize = resourceParameters.PageSize
+                        });
+                case ResourceUriType.NextPage:
+                    return _generator.GetUriByPage(_accessor.HttpContext,
+                        handler: null,
+                        page: "/getAllUsers",
+                        values:
+                        new
+                        {
+                            orderBy = resourceParameters.OrderBy,
+                            pageNumber = resourceParameters.PageNumber + 1,
+                            pageSize = resourceParameters.PageSize
+                        });
+                default:
+                    return _generator.GetUriByPage(_accessor.HttpContext,
+                        handler: null,
+                        page: "/getAllUsers",
+                        values:
+                        new
+                        {
+                            orderBy = resourceParameters.OrderBy,
+                            pageNumber = resourceParameters.PageNumber,
+                            pageSize = resourceParameters.PageSize
+                        });
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpGet("getAllUsers")]
+        public IActionResult GetAllUsers([FromQuery] ResourceParameters resourceParameters)
+        {
+            if (string.IsNullOrEmpty(resourceParameters.OrderBy))
+                resourceParameters.OrderBy = "Username";
+
+            var usersFromRepo = _userRepository.GetAllUsers(resourceParameters);
+
+            if (usersFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            IEnumerable<UserDto> userDtos = _mapper.Map<IEnumerable<UserDto>>(usersFromRepo);
+
+            Users users = new Users
+            {
+                UserDtos = userDtos
+            };
+
+            users.TotalCount = userDtos.Count();
+
+            var previousPageLink = usersFromRepo.HasPrevious ? CreateResourceUri(resourceParameters, ResourceUriType.PreviousPage) : null;
+
+            var x = CreateResourceUri(resourceParameters, ResourceUriType.NextPage);
+
+            var nextPageLink = usersFromRepo.HasNext ? CreateResourceUri(resourceParameters, ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = usersFromRepo.TotalCount,
+                pageSize = usersFromRepo.PageSize,
+                currentPage = usersFromRepo.CurrentPage,
+                totalPages = usersFromRepo.TotalPages,
+                previousPageLink = previousPageLink,
+                nextPageLink = nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination", Newtonsoft.Json.JsonConvert.SerializeObject(paginationMetadata));
+
+            return Ok(users);
         }
 
         [AllowAnonymous]
@@ -120,8 +204,8 @@ namespace WhiteboardAPI.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPut("{id}")]
-        public IActionResult UpdateUser(Guid id, [FromBody]UserUpdateDto userUpdateDto)
+        [HttpPut("{userId}")]
+        public IActionResult UpdateUser(Guid userId, [FromBody]UserUpdateDto userUpdateDto)
         {
             try
             {
@@ -131,7 +215,7 @@ namespace WhiteboardAPI.Controllers
                     return new Helpers.UnprocessableEntityObjectResult(ModelState);
                 }
 
-                if (!_userRepository.UserExists(id))
+                if (!_userRepository.UserExists(userId))
                 {
                     return NotFound();
                 }
@@ -139,7 +223,39 @@ namespace WhiteboardAPI.Controllers
                 // map dto to entity and set id
                 var user = _mapper.Map<UserDE>(userUpdateDto);
 
-                _userRepository.UpdateUser(id, user);
+                _userRepository.UpdateUser(userId, user);
+
+                if (!_userRepository.Save())
+                {
+                    throw new AppException("Updating {id} for user failed on save.");
+                }
+
+                return NoContent();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpDelete("{userId}")]
+        public IActionResult DeleteUser(Guid userId)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    // return 422
+                    return new Helpers.UnprocessableEntityObjectResult(ModelState);
+                }
+
+                if (!_userRepository.UserExists(userId))
+                {
+                    return NotFound();
+                }
+
+                _userRepository.DeleteUser(userId);
 
                 if (!_userRepository.Save())
                 {

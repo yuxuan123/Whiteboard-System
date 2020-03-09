@@ -1,5 +1,6 @@
 <template>
   <v-content>
+
     <v-container fluid fill-height grid-list-xl>
       <v-layout row warp>
         <v-flex xs4 sm8 align-center justify-center>
@@ -75,8 +76,23 @@
             aspect-ratio="1"
             height="100%"
           ></v-img>
+
         </v-flex>
       </v-layout>
+      <v-snackbar
+        v-model="snackbar"
+        :color="color"
+        :top="true"
+      >
+        {{ errorMessages }}
+        <v-btn
+          dark
+          flat
+          @click="snackbar = false"
+        >
+          Close
+        </v-btn>
+      </v-snackbar>
     </v-container>
     
   </v-content>
@@ -86,12 +102,13 @@
 export default {
   data: function() {
     return {
+      logo: require("@/assets/default/iconwhite.png"),
+      show: false,
       username: "",
       password: "",
       errorMessages: "Incorrect login info",
       snackbar: false,
       color: "general",
-      showPassword: false
     };
   },
   // Sends action to Vuex that will log you in and redirect to the dash otherwise, error
@@ -104,7 +121,7 @@ export default {
         .then(() => this.$router.push("/dashboard"))
         .catch(err => {
           this.snackbar = true;
-          this.snackColor = "error";
+          this.color = "error";
           this.message = "Login Error, Please try again later";
           console.log(err);
         });
@@ -117,3 +134,31 @@ export default {
   }
 };
 </script>
+
+<style>
+.login-bg {
+    min-height: 530px;
+    background-image: url("../../assets/default/hive.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    color: white;
+  }
+
+  .login-form {
+    min-width: 50%;
+  }
+
+  .active {
+    background: #fff;
+    color: #40ae9f;
+  }
+
+  .login-form .v-input__control > .v-input__slot {
+    background: rgba(244,248,247,1);
+  }
+
+  .login-form .v-text-field.v-text-field--enclosed .v-text-field__details {
+    margin-bottom: 0px;
+    height: 0px;
+  }
+</style>
