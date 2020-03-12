@@ -29,11 +29,6 @@ import VueCookies from 'vue-cookies'
 import VueParticles from 'vue-particles'
 import VueVideoPlayer from 'vue-video-player'
 
-//import Vue from 'vue'
-import VueTreeList from 'vue-tree-list'
-
-
-
 // Sync store with router
 sync(store, router);
 
@@ -44,7 +39,6 @@ Vue.use(CKEditor);
 Vue.use(VueAxios, axios);
 Vue.use(VueCookies)
 Vue.use(Viewer);
-Vue.use(VueTreeList);
 Vue.use(VueParticles);
 Vue.use(Vuetify, {
   iconfont: "mdi",
