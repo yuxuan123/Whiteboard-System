@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,15 +14,17 @@ namespace WhiteboardAPI.Controllers
     public class CourseController : Controller
     {
         private ICourseRepository _courseRepository;
+        private IContentRepository _contentRepository;
         private IDiscussionBoardRepository _discussionBoardRepository;
         private readonly IMapper _mapper;
         private readonly AppSettings _appSettings;
         private readonly IEmailSender _emailSender;
         private readonly IUrlHelper _urlHelper;
 
-        public CourseController(ICourseRepository courseRepository, IDiscussionBoardRepository discussionBoardRepository, IMapper mapper, IUrlHelper urlHelper, IOptions<AppSettings> appSettings, IEmailSender emailSender)
+        public CourseController(ICourseRepository courseRepository, IContentRepository contentRepository, IDiscussionBoardRepository discussionBoardRepository, IMapper mapper, IUrlHelper urlHelper, IOptions<AppSettings> appSettings, IEmailSender emailSender)
         {
             _courseRepository = courseRepository;
+            _contentRepository = contentRepository;
             _discussionBoardRepository = discussionBoardRepository;
             _mapper = mapper;
             _appSettings = appSettings.Value;
@@ -115,7 +118,7 @@ namespace WhiteboardAPI.Controllers
                 c.Students = _courseRepository.GetCourseStudent(c.CourseId);
                 c.Staff = _courseRepository.GetCourseStaff(c.CourseId);
                 c.CourseFolders = _mapper.Map<IEnumerable<CourseFolderDto>>(_discussionBoardRepository.GetCourseFolders(c.CourseId));
-                //c.Content
+                c.Contents = _contentRepository.GetContentByCourse(c.CourseId).Select(x => x.ContentId);
             }
 
             return Ok(courseDtos);
