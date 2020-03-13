@@ -52,7 +52,7 @@ namespace WhiteboardAPI.Controllers
         [HttpGet("getContent/{userId}")]
         public IActionResult GetContent(Guid userId)
         {
-            var contentsFromRepo = _contentRepository.GetContent(userId);
+            var contentsFromRepo = _contentRepository.GetContentByUser(userId);
 
             if (contentsFromRepo == null)
             {
