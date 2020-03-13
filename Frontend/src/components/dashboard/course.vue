@@ -1,36 +1,62 @@
-
 <template>
-  <v-toolbar>
-    <v-tabs
-      dark
-      background-color="primary"
-      grow
-    >
-      <v-tab>
-        <v-badge
-          color="pink"
-          dot
-        >
-          Item One
-        </v-badge>
-      </v-tab>
+  <v-layout>
+    <h1>Pusher Test</h1>
+    <p>
+      Publish an event to channel <code>my-channel</code> with event name
+      <code>my-event</code>; it will appear below:
+    </p>
+    <v-flex>
+      <ul>
+        <li v-for="message in messages" :key="message.id">
+          {{ message }}
+        </li>
+      </ul>
+    </v-flex>
+  </v-layout>
+</template>
 
-      <v-tab>
-        <v-badge
-          color="green"
-          content="6"
-        >
-          Item Two
-        </v-badge>
-      </v-tab>
+<script>
+import Pusher from "pusher-js";
 
-      <v-tab>
-        <v-badge
-          color="deep-purple accent-4"
-          icon="mdi-vuetify"
-        >
-          Item Three
-        </v-badge>
-      </v-tab>
-    </v-tabs>
-  </v-toolbar>
+Pusher.logToConsole = true;
+
+var pusher = new Pusher("0a3b3bc361a655ea56ac", {
+  cluster: "ap1",
+  forceTLS: true
+});
+
+export default {
+  data: () => ({
+    messages: []
+  }),
+  created() {
+    this.subscribe();
+    this.sendMessage();
+  },
+  methods: {
+    subscribe() {
+      var pusher = new Pusher("0a3b3bc361a655ea56ac", {
+        cluster: "ap1",
+        forceTLS: true
+      });
+      pusher.subscribe("my-channel");
+      pusher.bind("my-event", data => {
+        this.messages.push(JSON.stringify(data));
+      });
+    },
+    sendMessage() {
+      this.axios({
+        method: "post",
+        url: "https://whiteboardsyetem.azurewebsites.net/pusher",
+        data: {
+          name: "Alan",
+          message: "Test"
+        },
+        config: { headers: { "Content-Type": "application/json" } }
+      }).then(response => {
+        console.log("sent");
+      });
+    }
+  }
+};
+</script>

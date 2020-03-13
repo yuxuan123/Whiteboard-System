@@ -4,22 +4,15 @@
     grid-list-xl
     fill-height
   >
-    <v-layout
-      justify-center
-      align-center
-    >
+    <v-layout justify-center>
       <v-flex xs12>
-        <material-card
-          color="general"
-        >
-          <div
-            slot="header"
-          >
+        <material-card color="general">
+          <div slot="header">
             <div class="title font-weight-light mb-2">
               Announcements
             </div>
             <div class="category">
-              Check your tasks here! 
+              Check your tasks here!
             </div>
           </div>
 
@@ -32,40 +25,17 @@
                 md12
                 sm12
               >
+                <h3 class="title">
+                  Current Announcements
+                </h3>
                 <material-notification
-                  class="mb-4"
-                  color="success"
+                  v-for="item in notifications"
+                  :key="item.id"
+                  class="mb-2 test"
+                  color="#ffffff"
                   icon="mdi-tag"
                 >
-                  This is a plain notification
-                </material-notification>
-                <material-notification
-                  class="mb-4"
-                  color="warning"
-                  icon="mdi-tag"
-                >
-                  This is a plain notification
-                </material-notification>
-                <material-notification
-                  class="mb-4"
-                  color="error"
-                  icon="mdi-tag"
-                >
-                  This is a plain notification
-                </material-notification>
-                                <material-notification
-                  class="mb-4"
-                  color="purple"
-                  icon="mdi-tag"
-                >
-                  This is a plain notification
-                </material-notification>
-                                <material-notification
-                  class="mb-4"
-                  color="general"
-                  icon="mdi-tag"
-                >
-                  This is a plain notification
+                  {{ item.info }}
                 </material-notification>
               </v-flex>
             </v-layout>
@@ -75,3 +45,18 @@
     </v-layout>
   </v-container>
 </template>
+
+<script>
+export default {
+  data: () => ({
+    notifications: [{ id: "1", info: "ac" }, { id:"2", info: "abc" }, { id: "3", info: "acbc" }]
+  })
+};
+</script>
+
+<style>
+.text{
+  color: red !important;
+  border:0 !important;
+}
+</style>
