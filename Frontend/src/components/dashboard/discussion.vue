@@ -280,9 +280,7 @@
                       </v-layout>
                     </v-container>
                     <v-card-text>
-                      {{
-                        stripHTML(selectedDiscussion.description)
-                      }}
+                      {{ stripHTML(selectedDiscussion.description) }}
                     </v-card-text>
                     <v-card-actions class="pa-0 ml-2">
                       <v-chip
@@ -290,7 +288,8 @@
                         color="secondary"
                         class="white--text"
                       >
-                        From: {{ selectedDiscussion.createdby }}
+                        From:
+                        {{ fetchNameFromUserId(selectedDiscussion.createdBy) }}
                       </v-chip>
                       <v-btn
                         icon
@@ -350,7 +349,7 @@
                               color="secondary"
                               class="white--text"
                             >
-                              From: {{ item.createdby }}
+                              From: {{ fetchNameFromUserId(item.createdBy) }}
                             </v-chip>
                             <v-btn
                               icon
@@ -433,11 +432,13 @@ export default {
       discussImg: require("@/assets/default/discussion.png"),
       discussions: [],
       discussionPosts: [],
+      discussionPostsUser: [],
       newDiscussion: {},
       selectedDiscussion: {},
       snackbar: false,
       color: "general",
-      message: ""
+      message: "",
+      username: ""
     };
   },
   watch: {
@@ -513,6 +514,11 @@ export default {
     },
     fetchNameFromUserId(userId) {
       //Do an API call to get the names
+      //Future enhancement - Get in list instead of 1 by 1
+      this.$store.dispatch("GETUSERS", userId).then(response => {
+        this.userName = response.data.userDtos[0].userName;
+      });
+      return this.userName;
     },
     displayDiscussion(discussionPost) {
       this.page = "view-discussion";
@@ -546,6 +552,7 @@ export default {
       newReply.createdBy = $cookies.get("userid");
       this.$store.dispatch("CREATEPOSTREPLY", newReply).then(response => {
         this.discussionPosts.push(newReply);
+        this.newComment = "";
       });
     },
     createDiscussion() {

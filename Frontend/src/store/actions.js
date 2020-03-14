@@ -233,6 +233,18 @@ export default {
     })
   },
 
+  GETUSERS({ commit }, userId) {
+    return new Promise((resolve, reject) => {
+      axios.get(API_URL + "/getUsers?userIds=" + userId)
+        .then(response => {
+          return resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
   CHANGEPASSWORD({ commit }, payload) {
     return new Promise((resolve, reject) => {
       resolve(true);
