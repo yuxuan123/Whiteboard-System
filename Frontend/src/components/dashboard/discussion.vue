@@ -425,6 +425,7 @@ export default {
       page: "default",
       commentBox: false,
       newComment: "",
+      users: [],
       courses: [],
       courseFolders: [],
       selectedCourseFolders: [],
@@ -449,6 +450,7 @@ export default {
     }
   },
   created() {
+    this.getAllUsers();
     this.fetchUserCourses();
     this.fetchAllCourseFolders();
     this.fetchUserRelatedDiscussions();
@@ -471,6 +473,18 @@ export default {
         x => x.courseId === this.newDiscussion.courseId
       );
       this.selectedCourseFolders = this.courses[courseIndex].courseFolders;
+    },
+    getAllUsers() {
+      this.$store
+        .dispatch("GETALLUSERS")
+        .then(response => {
+          this.users = response.data.userDtos;
+        })
+        .catch(err => {
+          this.snackbar = true;
+          this.color = "error";
+          this.message = "Error, Please try again later";
+        });
     },
     fetchUserCourses() {
       //Get the list of courses first
@@ -513,12 +527,11 @@ export default {
       });
     },
     fetchNameFromUserId(userId) {
-      //Do an API call to get the names
-      //Future enhancement - Get in list instead of 1 by 1
-      this.$store.dispatch("GETUSERS", userId).then(response => {
-        this.userName = response.data.userDtos[0].userName;
-      });
-      return this.userName;
+      //Temp solution
+      //Get all users and save to array
+      //Search and return by id
+  var userIndex = this.users.findIndex(x => x.userId === userId);
+      return this.users[userIndex].userName;
     },
     displayDiscussion(discussionPost) {
       this.page = "view-discussion";

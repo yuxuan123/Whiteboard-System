@@ -35,6 +35,20 @@ export default {
   },
 
   /* User.vue */
+  // Without Params
+  GETALLUSERS({ commit }, pagination) {
+    return new Promise((resolve, reject) => {
+      axios.get(API_URL + '/getAllUsers')
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  //With Params
   GETALLUSER({ commit }, pagination) {
     return new Promise((resolve, reject) => {
       const { page, rowsPerPage, sortBy, descending, search } = pagination;
@@ -234,15 +248,14 @@ export default {
   },
 
   GETUSERS({ commit }, userId) {
-    return new Promise((resolve, reject) => {
-      axios.get(API_URL + "/getUsers?userIds=" + userId)
+
+       axios.get(API_URL + "/getUsers?userIds=" + userId)
         .then(response => {
-          return resolve(response)
+          resolve(response)
         })
         .catch(err => {
           reject(err)
         })
-    })
   },
 
   CHANGEPASSWORD({ commit }, payload) {
