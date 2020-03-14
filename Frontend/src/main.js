@@ -28,6 +28,7 @@ import Viewer from "v-viewer";
 import VueCookies from 'vue-cookies'
 import VueParticles from 'vue-particles'
 import VueVideoPlayer from 'vue-video-player'
+import VueTreeList from 'vue-tree-list'
 
 // Sync store with router
 sync(store, router);
@@ -48,6 +49,7 @@ Vue.use(VueVideoPlayer, /* {
   options: global default options,
   events: global videojs events
 } */)
+Vue.use(VueTreeList)
 
 // Disable annoying production mode warning 
 // ("You are running Vue in devmode") in Console

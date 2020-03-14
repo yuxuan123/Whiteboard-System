@@ -26,6 +26,7 @@
     "vue-cookies": "^1.6.1",
     "vue-image-crop-upload": "^2.5.0",
     "vue-meta": "^1.5.2",
+    "vue-tree-list": "^1.4.3",
     "vue-video-player": "^5.0.2",
     "vuetify": "^1.2.5"
   },
