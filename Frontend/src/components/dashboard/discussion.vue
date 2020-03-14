@@ -76,9 +76,7 @@
                 <v-list-tile-content>
                   <v-list-tile-title> {{ item.title }}</v-list-tile-title>
                   <v-list-tile-sub-title>
-                    {{
-                      stripHTML(item.description)
-                    }}
+                    {{ stripHTML(item.description) }}
                   </v-list-tile-sub-title>
                 </v-list-tile-content>
               </v-list-tile>
@@ -158,18 +156,36 @@
                     md12
                   >
                     <v-text-field
+                      v-model="newDiscussion.title"
                       label="Title"
                       required
                     />
                   </v-flex>
                   <v-flex
                     xs12
-                    sm12
-                    md12
+                    sm6
+                    md6
                   >
                     <v-select
-                      :items="discussionTypes"
-                      label="Category"
+                      v-model="newDiscussion.courseId"
+                      :items="courses"
+                      item-text="courseName"
+                      item-value="courseId"
+                      label="Course"
+                      @input="changeCourseFolders()"
+                    />
+                  </v-flex>
+                  <v-flex
+                    xs12
+                    sm6
+                    md6
+                  >
+                    <v-select
+                      v-model="newDiscussion.courseFolderId"
+                      :items="selectedCourseFolders"
+                      item-text="name"
+                      item-value="courseFolderId"
+                      label="Course Folder"
                     />
                   </v-flex>
                   <v-flex
@@ -177,7 +193,10 @@
                     sm12
                     md12
                   >
-                    <ckeditor :editor="editor" />
+                    <ckeditor
+                      v-model="newDiscussion.description"
+                      :editor="editor"
+                    />
                   </v-flex>
                 </v-layout>
               </v-container>
@@ -346,6 +365,20 @@
         </v-card>
       </v-flex>
     </v-layout>
+    <v-snackbar
+      v-model="snackbar"
+      :color="color"
+      :top="true"
+    >
+      {{ message }}
+      <v-btn
+        dark
+        flat
+        @click="snackbar = false"
+      >
+        Close
+      </v-btn>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -375,6 +408,9 @@ export default {
       page: "default",
       commentBox: false,
       newComment: "",
+      courses: [],
+      courseFolders: [],
+      selectedCourseFolders: [],
       discussionTypes: ["Lecture", "Tutorial", "Assignment", "Exam"],
       discussImg: require("@/assets/default/discussion.png"),
       discussions: [],
@@ -405,10 +441,16 @@ export default {
           createdby: "Evan"
         }
       ],
-      selectedDiscussion: {}
+      newDiscussion: {},
+      selectedDiscussion: {},
+      snackbar: false,
+      color: "general",
+      message: ""
     };
   },
   created() {
+    this.fetchAllCourses();
+    this.fetchAllCourseFolders();
     this.fetchUserRelatedDiscussions();
   },
   methods: {
@@ -416,13 +458,44 @@ export default {
       let text = striptags(item);
       return text;
     },
+    changeCourseFolders() {
+      var courseIndex = this.courses.findIndex(
+        x => x.courseId === this.newDiscussion.courseId
+      );
+      this.selectedCourseFolders = this.courses[courseIndex].courseFolders;
+    },
+    fetchAllCourses() {
+      //Get the list of courses first
+      //For Dropdownlist
+      this.$store
+        .dispatch("GETALLCOURSES")
+        .then(response => {
+          this.courses = response.data;
+        })
+        .catch(err => {
+          this.snackbar = true;
+          this.color = "error";
+          this.message = "Error, Please try again later";
+        });
+    },
+    fetchAllCourseFolders() {
+      this.$store
+        .dispatch("GETALLCOURSEFOLDERS")
+        .then(response => {
+          this.courseFolders = response.data;
+        })
+        .catch(err => {
+          this.snackbar = true;
+          this.color = "error";
+          this.message = "Error, Please try again later";
+        });
+    },
     fetchUserRelatedDiscussions() {
       //Get userid
       let userId = $cookies.get("userid");
       this.$store
         .dispatch("GETUSERCOURSEDISCUSSIONS", userId)
         .then(response => {
-          console.log(response);
           this.discussions = response.data;
         });
     },
