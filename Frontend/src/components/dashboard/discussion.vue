@@ -205,10 +205,10 @@
 
           <v-card-actions>
             <v-spacer />
-            <v-btn color="warning">
+            <v-btn color="warning" @click="newDiscussion = {}">
               Clear
             </v-btn>
-            <v-btn color="blue">
+            <v-btn color="blue" @click="createDiscussion">
               Post
             </v-btn>
           </v-card-actions>
@@ -383,6 +383,7 @@
 </template>
 
 <script>
+import moment from "moment";
 var striptags = require("striptags");
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
@@ -521,7 +522,35 @@ export default {
       };
       this.newComment = "";
       this.discussionPosts.push(item);
-    }
+    },
+    createDiscussion(){
+      //Add all the required fields before passing it over
+      this.newDiscussion.createdBy = $cookies.get("userid");
+      this.newDiscussion.createdOn = moment(new Date());
+      this.newDiscussion.userName = $cookies.get("username");
+      var id = this.newDiscussion.courseFolderId;
+
+      this.newDiscussion.courseFolderId = [];
+      this.newDiscussion.courseFolderId.push(id);
+      var item = this.newDiscussion;
+      delete item.courseName;
+      delete item.courseFolderName;
+
+      this.$store
+        .dispatch("CREATEDISCUSSION", item)
+        .then(response => {
+          this.discussions.push(item);
+          //Clear selectedCourseFolder & newDiscussion
+          this.selectedCourseFolders = [];
+          this.newDiscussion = {};
+          this.page = "default";
+        })
+        .catch(err => {
+          this.snackbar = true;
+          this.color = "error";
+          this.message = "Create Error, Please try again later";
+        });
+    },
   }
 };
 </script>
