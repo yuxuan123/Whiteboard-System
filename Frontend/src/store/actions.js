@@ -35,6 +35,20 @@ export default {
   },
 
   /* User.vue */
+  // Without Params
+  GETALLUSERS({ commit }, pagination) {
+    return new Promise((resolve, reject) => {
+      axios.get(API_URL + '/getAllUsers')
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  //With Params
   GETALLUSER({ commit }, pagination) {
     return new Promise((resolve, reject) => {
       const { page, rowsPerPage, sortBy, descending, search } = pagination;
@@ -124,7 +138,7 @@ export default {
     })
   },
 
-  UPDATEDISCUSSION({commit}, discussion){
+  UPDATEDISCUSSION({ commit }, discussion) {
     return new Promise((resolve, reject) => {
       axios.post(API_URL + '/updatePost', discussion)
         .then(response => {
@@ -171,6 +185,77 @@ export default {
           reject(err)
         })
     })
+  },
+
+  GETUSERCONTENT({ commit }, userId) {
+    return new Promise((resolve, reject) => {
+      axios.get(API_URL + '/getContent/' + userId)
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  GETUSERCOURSES({ commit }, userId) {
+    return new Promise((resolve, reject) => {
+      axios.get(API_URL + "/getCourseByUser/" + userId)
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  GETUSERCOURSEDISCUSSIONS({ commit }, payload) {
+    return new Promise((resolve, reject) => {
+      axios.get(API_URL + '/getPost/' + payload.userId, { params: { userId: payload.userId, courseId: payload.courseId, keyword: payload.keyword } })
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  GETPOSTREPLIES({ commit }, postId) {
+    return new Promise((resolve, reject) => {
+      axios.get(API_URL + "/getReply/" + postId)
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  CREATEPOSTREPLY({ commit }, post) {
+    return new Promise((resolve, reject) => {
+      axios.post(API_URL + "/createReply", post)
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  GETUSERS({ commit }, userId) {
+
+       axios.get(API_URL + "/getUsers?userIds=" + userId)
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
   },
 
   CHANGEPASSWORD({ commit }, payload) {
