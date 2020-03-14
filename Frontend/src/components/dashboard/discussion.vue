@@ -469,10 +469,9 @@ export default {
       this.fetchUserRelatedDiscussions();
     },
     changeCourseFolders() {
-      var courseIndex = this.courses.findIndex(
-        x => x.courseId === this.newDiscussion.courseId
-      );
-      this.selectedCourseFolders = this.courses[courseIndex].courseFolders;
+      this.$store.dispatch("GETCOURSEFOLDERS", this.newDiscussion.courseId).then(response => {
+        this.selectedCourseFolders = response.data;
+      });
     },
     getAllUsers() {
       this.$store

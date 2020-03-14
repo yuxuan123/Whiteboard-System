@@ -187,6 +187,18 @@ export default {
     })
   },
 
+  GETCOURSEFOLDERS({ commit }, courseId) {
+    return new Promise((resolve, reject) => {
+      axios.get(API_URL + '/getCourseFolders/' + courseId)
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
   GETUSERCONTENT({ commit }, userId) {
     return new Promise((resolve, reject) => {
       axios.get(API_URL + '/getContent/' + userId)
