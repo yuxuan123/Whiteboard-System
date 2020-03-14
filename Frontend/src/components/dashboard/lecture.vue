@@ -27,7 +27,7 @@
                 two-line
               >
                 <v-flex
-                  style=" position: sticky;top: 0;z-index: 999;background-color:#ffffff;"
+                  style="position: sticky;top: 0;z-index: 999;background-color:#ffffff;"
                 >
                   <v-text-field
                     v-model="newNote"
@@ -362,7 +362,6 @@ export default {
 
 .chatBox .content {
   max-width: 50%;
-  background-color: #e6e5eb;
   border-radius: 10px;
   display: inline-block;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14),
