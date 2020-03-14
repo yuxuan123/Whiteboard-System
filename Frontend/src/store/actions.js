@@ -173,6 +173,18 @@ export default {
     })
   },
 
+  GETUSERCONTENT({ commit }, userId){
+    return new Promise((resolve, reject) => {
+      axios.get(API_URL + '/getContent/' + userId)
+      .then(response => {
+        resolve(response)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
+  },
+
   CHANGEPASSWORD({ commit }, payload) {
     return new Promise((resolve, reject) => {
       resolve(true);
