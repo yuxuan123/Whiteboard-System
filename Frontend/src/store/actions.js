@@ -248,16 +248,42 @@ export default {
   },
 
   GETUSERS({ commit }, userId) {
-
-       axios.get(API_URL + "/getUsers?userIds=" + userId)
+    return new Promise((resolve, reject) => {
+      axios.get(API_URL + "/getUsers?userIds=" + userId)
         .then(response => {
           resolve(response)
         })
         .catch(err => {
           reject(err)
         })
+    })
   },
 
+  SENDPUSHERMESSAGE({ commit }, message) {
+    return new Promise((resolve, reject) => {
+      axios.post(API_URL + "/pusher", message)
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  GETALLCHAT({ commit }, lectureId) {
+    return new Promise((resolve, reject) => {
+      axios.post(API_URL + "/getAllChat/" + lectureId)
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  //Future enhancements
   CHANGEPASSWORD({ commit }, payload) {
     return new Promise((resolve, reject) => {
       resolve(true);
