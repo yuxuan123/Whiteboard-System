@@ -124,7 +124,7 @@ export default {
     })
   },
 
-  UPDATEDISCUSSION({commit}, discussion){
+  UPDATEDISCUSSION({ commit }, discussion) {
     return new Promise((resolve, reject) => {
       axios.post(API_URL + '/updatePost', discussion)
         .then(response => {
@@ -173,28 +173,39 @@ export default {
     })
   },
 
-  GETUSERCONTENT({ commit }, userId){
+  GETUSERCONTENT({ commit }, userId) {
     return new Promise((resolve, reject) => {
       axios.get(API_URL + '/getContent/' + userId)
-      .then(response => {
-        resolve(response)
-      })
-      .catch(err => {
-        reject(err)
-      })
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
 
-
-  GETUSERCOURSEDISCUSSIONS({ commit }, userId){
+  GETUSERCOURSES({ commit }, userId) {
     return new Promise((resolve, reject) => {
-      axios.get(API_URL + '/getPost/' + userId)
-      .then(response => {
-        resolve(response)
-      })
-      .catch(err => {
-        reject(err)
-      })
+      axios.get(API_URL+"/getCourseByUser/" +userId)
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  GETUSERCOURSEDISCUSSIONS({ commit }, payload) {
+    return new Promise((resolve, reject) => {
+      axios.get(API_URL + '/getPost/' + payload.userId, { params: { userId: payload.userId, courseId: payload.courseId, keyword: payload.keyword } })
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
 

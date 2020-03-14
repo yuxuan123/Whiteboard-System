@@ -25,9 +25,10 @@
             <v-layout style="max-width:100%;">
               <v-flex
                 sm12
-                md6
+                md5
               >
                 <v-text-field
+                  v-model.lazy="search"
                   class="pr-0 pt-3 pb-0 pl-3"
                   append-icon="search"
                   label="Search"
@@ -38,13 +39,17 @@
 
               <v-flex
                 sm12
-                md6
+                md7
               >
                 <v-select
-                  :items="discussionTypes"
-                  class="pr-3 pt-3 pb-0 pl-0"
+                  v-model="searchCourseId"
+                  :items="courses"
+                  item-text="courseName"
+                  item-value="courseId"
                   label="Courses"
+                  class="pr-3 pt-3 pb-0 pl-0"
                   dense
+                  @input="searchByCourse"
                 />
               </v-flex>
             </v-layout>
@@ -205,10 +210,16 @@
 
           <v-card-actions>
             <v-spacer />
-            <v-btn color="warning" @click="newDiscussion = {}">
+            <v-btn
+              color="warning"
+              @click="newDiscussion = {}"
+            >
               Clear
             </v-btn>
-            <v-btn color="blue" @click="createDiscussion">
+            <v-btn
+              color="blue"
+              @click="createDiscussion"
+            >
               Post
             </v-btn>
           </v-card-actions>
@@ -406,6 +417,8 @@ export default {
           ]
         }
       },
+      search: "",
+      searchCourseId: "",
       page: "default",
       commentBox: false,
       newComment: "",
@@ -449,8 +462,15 @@ export default {
       message: ""
     };
   },
+  watch: {
+    search: {
+      handler(input) {
+        this.searchPosts(input);
+      }
+    }
+  },
   created() {
-    this.fetchAllCourses();
+    this.fetchUserCourses();
     this.fetchAllCourseFolders();
     this.fetchUserRelatedDiscussions();
   },
@@ -459,17 +479,27 @@ export default {
       let text = striptags(item);
       return text;
     },
+    searchPosts(input) {
+      if (input.length > 3 || input.length == 0) {
+        this.fetchUserRelatedDiscussions();
+      }
+    },
+    searchByCourse() {
+      this.fetchUserRelatedDiscussions();
+    },
     changeCourseFolders() {
       var courseIndex = this.courses.findIndex(
         x => x.courseId === this.newDiscussion.courseId
       );
       this.selectedCourseFolders = this.courses[courseIndex].courseFolders;
     },
-    fetchAllCourses() {
+    fetchUserCourses() {
       //Get the list of courses first
       //For Dropdownlist
+      //get userId
+      let userId = $cookies.get("userid");
       this.$store
-        .dispatch("GETALLCOURSES")
+        .dispatch("GETUSERCOURSES", userId)
         .then(response => {
           this.courses = response.data;
         })
@@ -494,18 +524,23 @@ export default {
     fetchUserRelatedDiscussions() {
       //Get userid
       let userId = $cookies.get("userid");
-      this.$store
-        .dispatch("GETUSERCOURSEDISCUSSIONS", userId)
-        .then(response => {
-          this.discussions = response.data;
-        });
+      var item = {
+        userId: userId,
+        courseId: this.searchCourseId,
+        keyword: this.search
+      };
+      this.$store.dispatch("GETUSERCOURSEDISCUSSIONS", item).then(response => {
+        this.discussions = response.data;
+      });
     },
     displayDiscussion(discussionPost) {
       this.page = "view-discussion";
       this.selectedDiscussion = {};
       this.selectedDiscussion.title = discussionPost.title;
       this.selectedDiscussion.body = discussionPost.body;
-      this.selectedDiscussion.datetime = "01/03/20 20:30:00pm";
+      this.selectedDiscussion.datetime = moment(
+        discussionPost.createdOn
+      ).format("DD/MM/YY HH:mm:ss");
       this.selectedDiscussion.createdby = discussionPost.createdby;
 
       //Fetch related posts
@@ -523,7 +558,7 @@ export default {
       this.newComment = "";
       this.discussionPosts.push(item);
     },
-    createDiscussion(){
+    createDiscussion() {
       //Add all the required fields before passing it over
       this.newDiscussion.createdBy = $cookies.get("userid");
       this.newDiscussion.createdOn = moment(new Date());
@@ -550,7 +585,7 @@ export default {
           this.color = "error";
           this.message = "Create Error, Please try again later";
         });
-    },
+    }
   }
 };
 </script>
