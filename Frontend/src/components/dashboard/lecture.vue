@@ -16,12 +16,12 @@
         md4
         class="pa-0"
       >
-        <v-card height="100%">
+        <v-card max-height="100%">
           <v-card-text class="pa-2 ml-1">
             <v-flex
               row
               class="scroll-y"
-              style="height: 50vh;"
+              style="height: 47vh;"
             >
               <v-list
                 subheader
@@ -121,7 +121,7 @@
         md8
         class="pa-0"
       >
-        <v-card height="100%">
+        <v-card max-height="100%">
           <v-card-text>
             <v-layout column>
               <video-player
@@ -322,7 +322,7 @@ export default {
 <style>
 .video-js {
   position: relative !important;
-  height: 100vh !important;
+  height: 99vh !important;
 }
 
 .vjs-poster {
