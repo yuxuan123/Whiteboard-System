@@ -31,12 +31,14 @@
                   style="position: sticky;top: 0;z-index: 999;background-color:#ffffff;"
                 >
                   <v-select
+                    v-model="selectedContentId"
                     :items="contents"
                     item-text="title"
                     item-value="contentId"
                     label="Live Lecture Courses"
                     class="pa-0"
                     dense
+                    @input="changeLiveLecture"
                   />
                   <v-text-field
                     v-model="newNote"
@@ -167,6 +169,7 @@ export default {
   components: { LiveLectureEnded: LiveLectureEnded },
   data() {
     return {
+      selectedContentId: "",
       liveLectureStatus: true,
       content: {},
       contents: [],
@@ -224,16 +227,26 @@ export default {
       if (this.contents.length > 0) {
         //By default it will load the first live lecture
         this.content = this.contents[0];
-        //Subscribe to the channel
-        this.subscribeChannel(this.content.contentId);
-        this.getAllChat(this.content.contentId);
-        this.playerOptions.sources[0].src = this.content.url;
+        this.liveChatConfigs();
       } else {
         this.liveLectureStatus = true;
       }
     });
   },
   methods: {
+    liveChatConfigs() {
+      //Subscribe to the channel
+      this.subscribeChannel(this.content.contentId);
+      this.getAllChat(this.content.contentId);
+      this.playerOptions.sources[0].src = this.content.url;
+    },
+    changeLiveLecture() {
+      var contentIndex = this.contents.findIndex(
+        x => x.contentId === this.selectedContentId
+      );
+      this.content = this.contents[contentIndex];
+      this.liveChatConfigs();
+    },
     subscribeChannel(lectureId) {
       var pusher = new Pusher("0a3b3bc361a655ea56ac", {
         cluster: "ap1",
@@ -242,7 +255,7 @@ export default {
       pusher.subscribe(lectureId);
       pusher.bind("my-event", data => {
         this.messages.push(data);
-         this.scrollTo();
+        this.scrollTo();
       });
     },
     getAllChat(lectureId) {
