@@ -148,7 +148,8 @@ namespace WhiteboardAPI
             app.UseCors(x => x
                 .AllowAnyOrigin()
                 .AllowAnyMethod()
-                .AllowAnyHeader());
+                .AllowAnyHeader()
+                .WithExposedHeaders("content-encoding", "content-length", "content-type", "date", "server", "x-pagination"));
 
             app.UseEndpoints(endpoints =>
             {

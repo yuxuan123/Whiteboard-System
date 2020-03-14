@@ -20,6 +20,7 @@ namespace WhiteboardAPI.Repository
         IEnumerable<PostDE> GetPostsByUser(Guid userId, Guid courseId, string keyword);
         IEnumerable<PostDE> GetPostsByCourse(Guid courseId);
         IEnumerable<ReplyDE> GetReplies(Guid PostId);
+        IEnumerable<CourseFolderDE> GetAllCourseFolders();
         IEnumerable<CourseFolderDE> GetCourseFolders(Guid CourseId); //get course dto
         IEnumerable<PostFolderDE> GetPostFolders(Guid postId);
         void UpdatePost(PostDto postDto);
@@ -157,6 +158,11 @@ namespace WhiteboardAPI.Repository
             return _context.tbl_db_reply.Where(x => x.PostId == postId);
         }
 
+        public IEnumerable<CourseFolderDE> GetAllCourseFolders()
+        {
+            return _context.tbl_db_course_folder;
+        }
+
         public IEnumerable<CourseFolderDE> GetCourseFolders(Guid courseId)
         {
             return _context.tbl_db_course_folder.Where(x => x.CourseId == courseId);
@@ -180,6 +186,7 @@ namespace WhiteboardAPI.Repository
         public void UpdatePost(PostDto postDto)
         {
             PostDE post = _context.tbl_db_post.Where(x => x.PostId == postDto.PostId).FirstOrDefault();
+            var postFolder = _context.tbl_db_post_folder.Where(x => x.PostId == postDto.PostId).FirstOrDefault();
 
             if (post == null)
                 throw new AppException("PostId does not exist");
@@ -189,9 +196,15 @@ namespace WhiteboardAPI.Repository
                 post.Title = postDto.Title;
             }
 
-            if (!string.IsNullOrEmpty(postDto.Title))
+            if (!string.IsNullOrEmpty(postDto.Description))
             {
                 post.Description = postDto.Description;
+            }
+
+            if (postFolder != null && postDto.CourseFolderId[0] != postFolder.CourseFolderId)
+            {
+                postFolder.CourseFolderId = postDto.CourseFolderId[0];
+                _context.tbl_db_post_folder.Update(postFolder);
             }
 
             post.isEdited = true;

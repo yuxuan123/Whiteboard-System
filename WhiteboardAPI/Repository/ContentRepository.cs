@@ -12,7 +12,8 @@ namespace WhiteboardAPI.Repository
     public interface IContentRepository
     {
         ContentDE AddContent(ContentDto contentDto);
-        IEnumerable<ContentDE> GetContent(Guid userId);
+        IEnumerable<ContentDE> GetContentByUser(Guid userId);
+        IEnumerable<ContentDE> GetContentByCourse(Guid courseId);
         void UpdateContent(ContentDto contentDto);
         void DeleteContent(Guid contentId);
         public bool Save();
@@ -56,10 +57,15 @@ namespace WhiteboardAPI.Repository
             return content;
         }
 
-        public IEnumerable<ContentDE> GetContent(Guid userId)
+        public IEnumerable<ContentDE> GetContentByUser(Guid userId)
         {
             var courses = _courseRepository.GetCourseByUser(userId).Select(x => x.CourseId);
             return _context.tbl_content.Where(x => courses.Contains(x.CourseId));
+        }
+
+        public IEnumerable<ContentDE> GetContentByCourse(Guid courseId)
+        {
+            return _context.tbl_content.Where(x => x.CourseId == courseId);
         }
 
         public void UpdateContent(ContentDto contentDto)
