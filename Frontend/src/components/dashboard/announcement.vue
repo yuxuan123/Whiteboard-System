@@ -81,7 +81,12 @@ export default {
     //Get userid
     let userId = $cookies.get("userid");
     this.$store.dispatch("GETUSERCONTENT", userId).then(response => {
-      this.announcements = response.data;
+      // Check if type is announcement first.
+      for(var i = 0; i < response.data.length; i++){
+        if(response.data[i].type == "announcement"){
+          this.announcements.push(response.data[i]);
+        }
+      }
     });
   },
   methods: {
