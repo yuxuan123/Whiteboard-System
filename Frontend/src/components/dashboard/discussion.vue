@@ -279,7 +279,11 @@
                         }}</span>
                       </v-layout>
                     </v-container>
-                    <v-card-text>{{ selectedDiscussion.body }}</v-card-text>
+                    <v-card-text>
+                      {{
+                        stripHTML(selectedDiscussion.description)
+                      }}
+                    </v-card-text>
                     <v-card-actions class="pa-0 ml-2">
                       <v-chip
                         small
@@ -339,7 +343,7 @@
                           class="pa-3"
                           hover
                         >
-                          <v-card-text>{{ item.body }}</v-card-text>
+                          <v-card-text>{{ item.description }}</v-card-text>
                           <v-card-actions class="pa-0 ml-2">
                             <v-chip
                               small
@@ -428,33 +432,7 @@ export default {
       discussionTypes: ["Lecture", "Tutorial", "Assignment", "Exam"],
       discussImg: require("@/assets/default/discussion.png"),
       discussions: [],
-      discussionPosts: [
-        {
-          id: "dp1",
-          body: "Here's comment number 1. Can you see it?",
-          createdby: "Alan"
-        },
-        {
-          id: "dp2",
-          body: "Here's comment number 2. Can you see it?",
-          createdby: "Bill"
-        },
-        {
-          id: "dp3",
-          body: "Here's comment number 3. Can you see it?",
-          createdby: "Charlie"
-        },
-        {
-          id: "dp4",
-          body: "Here's comment number 4. Can you see it?",
-          createdby: "David"
-        },
-        {
-          id: "dp5",
-          body: "Here's comment number 5. Can you see it?",
-          createdby: "Evan"
-        }
-      ],
+      discussionPosts: [],
       newDiscussion: {},
       selectedDiscussion: {},
       snackbar: false,
@@ -533,30 +511,42 @@ export default {
         this.discussions = response.data;
       });
     },
+    fetchNameFromUserId(userId) {
+      //Do an API call to get the names
+    },
     displayDiscussion(discussionPost) {
       this.page = "view-discussion";
       this.selectedDiscussion = {};
+      this.selectedDiscussion.postId = discussionPost.postId;
       this.selectedDiscussion.title = discussionPost.title;
-      this.selectedDiscussion.body = discussionPost.body;
+      this.selectedDiscussion.description = discussionPost.description;
       this.selectedDiscussion.datetime = moment(
         discussionPost.createdOn
       ).format("DD/MM/YY HH:mm:ss");
-      this.selectedDiscussion.createdby = discussionPost.createdby;
-
-      //Fetch related posts
-      //displayDiscussionPost(discussionPost.id);
-    },
-    displayDiscussionPost(id) {
-      //Fetch discussion posts by id
+      this.selectedDiscussion.createdBy = discussionPost.createdBy;
+      this.$store
+        .dispatch("GETPOSTREPLIES", discussionPost.postId)
+        .then(response => {
+          this.discussionPosts = response.data;
+        });
+      //Display Discussion Posts
+      //Future enhancements - differentate posts from lecturer and student
+      /* var lecturerReplies = discussionPost.lecturerReply;
+      var studentReplies = discussionPost.studentReply;
+      var totalReplies = lecturerReplies.concat(studentReplies); */
     },
     addComment(message) {
-      var item = {
-        id: "dp1",
-        body: message,
-        createdby: "Alan"
-      };
-      this.newComment = "";
-      this.discussionPosts.push(item);
+      var newReply = {};
+      newReply.postId = this.selectedDiscussion.postId;
+      newReply.description = message;
+      newReply.role = $cookies.get("role");
+      newReply.userName = $cookies.get("username");
+      newReply.isEdited = true;
+      newReply.createdOn = moment(new Date());
+      newReply.createdBy = $cookies.get("userid");
+      this.$store.dispatch("CREATEPOSTREPLY", newReply).then(response => {
+        this.discussionPosts.push(newReply);
+      });
     },
     createDiscussion() {
       //Add all the required fields before passing it over

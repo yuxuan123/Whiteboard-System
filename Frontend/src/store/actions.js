@@ -187,7 +187,7 @@ export default {
 
   GETUSERCOURSES({ commit }, userId) {
     return new Promise((resolve, reject) => {
-      axios.get(API_URL+"/getCourseByUser/" +userId)
+      axios.get(API_URL + "/getCourseByUser/" + userId)
         .then(response => {
           resolve(response)
         })
@@ -200,6 +200,30 @@ export default {
   GETUSERCOURSEDISCUSSIONS({ commit }, payload) {
     return new Promise((resolve, reject) => {
       axios.get(API_URL + '/getPost/' + payload.userId, { params: { userId: payload.userId, courseId: payload.courseId, keyword: payload.keyword } })
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  GETPOSTREPLIES({ commit }, postId) {
+    return new Promise((resolve, reject) => {
+      axios.get(API_URL + "/getReply/" + postId)
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  CREATEPOSTREPLY({ commit }, post) {
+    return new Promise((resolve, reject) => {
+      axios.post(API_URL + "/createReply", post)
         .then(response => {
           resolve(response)
         })
