@@ -117,7 +117,7 @@ export default {
   font-size: 16px;
 }
 
-.v-icon{
+.v-alert .v-icon{
   color:white !important;
 }
 </style>
