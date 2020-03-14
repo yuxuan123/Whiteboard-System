@@ -27,15 +27,17 @@
                 default-tree-node-name="new Course"
                 default-leaf-node-name="new Material"
                 v-bind:default-expanded="false"
-                v-bind:showCheckBox='true' 
+                v-bind:showCheckBox="true"
               >
                 <span class="icon" slot="addLeafNodeIcon">＋</span>
                 <span class="icon" slot="editNodeIcon">📃</span>
                 <span class="icon" slot="delNodeIcon">✂️</span>
                 <span class="icon" slot="leafNodeIcon">📃</span>
                 <span class="icon" slot="treeNodeIcon">📂</span>
+                <span class="icon">🌲</span>
                 
               </vue-tree-list>
+              
               <!-- <button @click="fetchData">Get new tree</button>
               <span class="icon" slot="treeNodeIcon">📂</span>
               <span class="icon" slot="addTreeNodeIcon">📂</span>-->
@@ -63,8 +65,8 @@ export default {
   created() {
     var orgData = this.CourseCodeNo;
     let userId = $cookies.get("userid");
-    
-    var arrayCoruseName=[];
+
+    var arrayCoruseName = [];
     var arrayCourseCode = [];
     var arrayCodeID = [];
     const axios = require("axios");
@@ -87,8 +89,13 @@ export default {
         .then(function(response) {
           for (var k = 0; k < arrayCourseCode.length; k++) {
             var node = new TreeNode({
-              name: arrayCourseCode[k]+" "+arrayCoruseName[k],
-              isLeaf: false
+              name: arrayCourseCode[k] + " " + arrayCoruseName[k],
+              isLeaf: false,
+              dragDisabled: true,
+              addTreeNodeDisabled: true,
+              addLeafNodeDisabled: true,
+              editNodeDisabled: true,
+              delNodeDisabled: true
             });
             if (!orgData.children) {
               orgData.children = [];
@@ -99,14 +106,20 @@ export default {
             for (var l = 0; l < response.data.length; l++) {
               if (
                 response.data[l].courseId === arrayCodeID[k] &&
-                (response.data[l].type === "lecture_slides"||response.data[l].type === "lecture_video")
+                (response.data[l].type === "lecture_slides" ||
+                  response.data[l].type === "lecture_video")
               ) {
                 var nodeleaf = new TreeNode({
                   name:
                     response.data[l].title +
                     "/       Url:" +
                     response.data[l].url,
-                  isLeaf: true
+                  isLeaf: true,
+                  dragDisabled: true,
+                  addTreeNodeDisabled: true,
+                  addLeafNodeDisabled: true,
+                  editNodeDisabled: true,
+                  delNodeDisabled: true
                 });
 
                 orgData.children[k].addChildren(nodeleaf);
@@ -160,23 +173,30 @@ export default {
         alert("Only Prof are allow to add new course.");
       }
     },
-    onCslick() {}
+    onCslick() {
+      if (confirm("Do you want to download this?")) {
+        // Save it!
+      } else {
+        // Do nothing!
+      }
+    }
   }
 };
 </script>
 
-<style lang="less" rel="stylesheet/less">
-.vtl {
-  .vtl-drag-disabled {
-    background-color: #d0cfcf;
-    &:hover {
-      background-color: #d0cfcf;
-    }
-  }
-  .vtl-disabled {
-    background-color: #d0cfcf;
-  }
-}
+// <style lang="less" rel="stylesheet/less">
+// .vtl {
+//   .vtl-drag-disabled {
+//     background-color: #d0cfcf;
+//     &:hover {
+//       background-color: #d0cfcf;
+//     }
+//   }
+//   // .vtl-disabled {
+//   //   background-color: #d0cfcf;
+//   // }
+// }
+//
 </style>
 
 <style lang="less" rel="stylesheet/less" scoped>
