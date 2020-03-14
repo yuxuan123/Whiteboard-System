@@ -43,7 +43,7 @@
                 <v-select
                   :items="discussionTypes"
                   class="pr-3 pt-3 pb-0 pl-0"
-                  label="Categories"
+                  label="Courses"
                   dense
                 />
               </v-flex>
@@ -64,16 +64,8 @@
             </template>
 
             <template v-for="(item, index) in discussions">
-              <v-subheader
-                v-if="item.header"
-                :key="item.header"
-              >
-                {{ item.header }}
-              </v-subheader>
-
               <v-list-tile
-                v-else
-                :key="item.id"
+                :key="item.postId"
                 avatar
                 @click="displayDiscussion(item)"
               >
@@ -83,7 +75,11 @@
 
                 <v-list-tile-content>
                   <v-list-tile-title> {{ item.title }}</v-list-tile-title>
-                  <v-list-tile-sub-title>{{ item.body }}</v-list-tile-sub-title>
+                  <v-list-tile-sub-title>
+                    {{
+                      stripHTML(item.description)
+                    }}
+                  </v-list-tile-sub-title>
                 </v-list-tile-content>
               </v-list-tile>
               <v-divider
@@ -132,9 +128,7 @@
         class="discussion-page-padding"
       >
         <v-card height="100%">
-          <v-card-title
-            class="discussion-title-color"
-          >
+          <v-card-title class="discussion-title-color">
             <span
               class="headline white--text font-weight-thin pa-2"
             >New Discussion</span>
@@ -214,9 +208,7 @@
             class="scroll-y discussion-thread"
             three-line
           >
-            <v-card-title
-              class="discussion-title-fixed"
-            >
+            <v-card-title class="discussion-title-fixed">
               <span
                 class="headline white--text font-weight-thin pa-2"
               >View Discussion</span>
@@ -247,9 +239,7 @@
                     class="pa-3"
                     hover
                   >
-                    <v-container
-                      fluid
-                    >
+                    <v-container fluid>
                       <v-layout column>
                         <span class="headline font-weight-light pt-3">{{
                           selectedDiscussion.title
@@ -298,8 +288,8 @@
                         v-model="newComment"
                         append-outer-icon="send"
                         class="mx-2"
-                        label="Message to send" 
-                        rows="2" 
+                        label="Message to send"
+                        rows="2"
                         @click:append-outer="addComment(newComment)"
                       />
                     </v-flex>
@@ -360,6 +350,7 @@
 </template>
 
 <script>
+var striptags = require("striptags");
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 export default {
@@ -386,44 +377,7 @@ export default {
       newComment: "",
       discussionTypes: ["Lecture", "Tutorial", "Assignment", "Exam"],
       discussImg: require("@/assets/default/discussion.png"),
-      discussions: [
-        { header: "Today" },
-        {
-          id: "d1",
-          title: "Question 1",
-          body:
-            "Alan - Dear Prof, can you answer this question? Thank you!",
-          createdby: "Alan"
-        },
-        {
-          id: "d2",
-          title: "Question 2",
-          body:
-            "Bill - Dear Prof, can you answer this question? Thank you!",
-          createdby: "Bill"
-        },
-        {
-          id: "d3",
-          title: "Question 3",
-          body:
-            "Charlie - Dear Prof, can you answer this question? Thank you!",
-          createdby: "Charlie"
-        },
-        {
-          id: "d4",
-          title: "Question 4",
-          body:
-            "David - Dear Prof, can you answer this question? Thank you!",
-          createdby: "David"
-        },
-        {
-          id: "d5",
-          title: "Question 5",
-          body:
-            "Evan - Dear Prof, can you answer this question? Thank you!",
-          createdby: "Evan"
-        }
-      ],
+      discussions: [],
       discussionPosts: [
         {
           id: "dp1",
@@ -454,7 +408,24 @@ export default {
       selectedDiscussion: {}
     };
   },
+  created() {
+    this.fetchUserRelatedDiscussions();
+  },
   methods: {
+    stripHTML(item) {
+      let text = striptags(item);
+      return text;
+    },
+    fetchUserRelatedDiscussions() {
+      //Get userid
+      let userId = $cookies.get("userid");
+      this.$store
+        .dispatch("GETUSERCOURSEDISCUSSIONS", userId)
+        .then(response => {
+          console.log(response);
+          this.discussions = response.data;
+        });
+    },
     displayDiscussion(discussionPost) {
       this.page = "view-discussion";
       this.selectedDiscussion = {};
@@ -469,12 +440,12 @@ export default {
     displayDiscussionPost(id) {
       //Fetch discussion posts by id
     },
-    addComment(message){
+    addComment(message) {
       var item = {
         id: "dp1",
         body: message,
         createdby: "Alan"
-      }
+      };
       this.newComment = "";
       this.discussionPosts.push(item);
     }
