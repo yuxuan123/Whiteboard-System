@@ -120,7 +120,7 @@ export default {
   },
   created: function() {
     var role = $cookies.get("role");
-    if (role == "student") {
+    if (role == "student" || role == "lecturer") {
       // Hide sidebar tabs that is not related to user
       var userIndex = this.links.findIndex(x => x.name === "Manage Users");
       this.links.splice(userIndex, 1);
