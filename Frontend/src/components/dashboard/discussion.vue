@@ -72,7 +72,7 @@
               <v-list-tile
                 :key="item.postId"
                 avatar
-                class="pa-2"
+                class="discussionList"
                 @click="displayDiscussion(item)"
               >
                 <v-list-tile-avatar class="pt-3">
@@ -658,4 +658,11 @@ export default {
 </script>
 <style>
 @import url("../../styles/custom/discussion.css");
+
+.discussionList a{
+  padding-top: 20px !important;
+  padding-bottom: 20px !important;
+  padding-left: 30px !important;
+  padding-right: 30px !important;
+}
 </style>
