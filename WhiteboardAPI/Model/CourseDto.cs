@@ -14,6 +14,6 @@ namespace WhiteboardAPI.Model
         public IEnumerable<Guid> Contents { get; set; }
         public IEnumerable<CourseFolderDto> CourseFolders { get; set; }
         public Guid CreatedBy { get; set; }
-        public DateTime CreatedOn { get; set; }
+        public DateTime? CreatedOn { get; set; }
     }
 }

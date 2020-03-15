@@ -14,7 +14,7 @@ namespace WhiteboardAPI.Model
         public List<Guid> CourseFolderId { get; set; }
         public string UserName { get; set; }
         public bool isEdited { get; set; }
-        public DateTime CreatedOn { get; set; }
+        public DateTime? CreatedOn { get; set; }
         public Guid CreatedBy { get; set; }
     }
 }
