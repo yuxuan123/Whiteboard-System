@@ -113,7 +113,7 @@ namespace WhiteboardAPI.Repository
         {
             var courses = _context.tbl_course_student.Where(x => x.StudentId == userId && x.IsActive).Select(x => x.CourseId);
 
-            if (courses == null)
+            if (courses.Count() == 0)
                 courses = _context.tbl_course_staff.Where(x => x.StaffId == userId && x.IsActive).Select(x => x.CourseId);
 
             return _context.tbl_course.Where(x => courses.Contains(x.CourseId));
