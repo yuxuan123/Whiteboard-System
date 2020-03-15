@@ -6,6 +6,7 @@
     class="pa-0"
   >
     <v-layout
+      v-if="liveLectureStatus"
       row
       wrap
     >
@@ -15,20 +16,30 @@
         md4
         class="pa-0"
       >
-        <v-card height="100%">
+        <v-card max-height="100%">
           <v-card-text class="pa-2 ml-1">
             <v-flex
               row
               class="scroll-y"
-              style="height: 50vh;"
+              style="height: 47vh;"
             >
               <v-list
                 subheader
                 two-line
               >
                 <v-flex
-                  style=" position: sticky;top: 0;z-index: 999;background-color:#ffffff;"
+                  style="position: sticky;top: 0;z-index: 999;background-color:#ffffff;"
                 >
+                  <v-select
+                    v-model="selectedContentId"
+                    :items="contents"
+                    item-text="title"
+                    item-value="contentId"
+                    label="Live Lecture Courses"
+                    class="pa-0"
+                    dense
+                    @input="changeLiveLecture"
+                  />
                   <v-text-field
                     v-model="newNote"
                     counter="50"
@@ -75,26 +86,27 @@
                 <template>
                   <v-flex
                     v-for="(message, index) in messages"
-                    :key="message.id"
+                    :key="index"
                     class="message py-1"
-                    :class="{ own: message.user == username }"
+                    :class="{ own: message.userName == username }"
                   >
                     <v-flex
                       v-if="
-                        index > 0 && messages[index - 1].user != message.user
+                        index > 0 &&
+                          messages[index - 1].user != message.userName
                       "
                       class="username"
                     >
-                      {{ message.user }}
+                      {{ message.userName }}
                     </v-flex>
                     <v-flex
                       v-if="index == 0"
                       class="username"
                     >
-                      {{ message.user }}
+                      {{ message.userName }}
                     </v-flex>
                     <v-flex class="content">
-                      <div v-html="message.content" />
+                      <div v-html="message.message" />
                     </v-flex>
                   </v-flex>
                 </template>
@@ -120,7 +132,7 @@
         md8
         class="pa-0"
       >
-        <v-card height="100%">
+        <v-card max-height="100%">
           <v-card-text>
             <v-layout column>
               <video-player
@@ -128,33 +140,39 @@
                 class="vjs-custom-skin"
                 :options="playerOptions"
                 :playsinline="true"
-                @play="onPlayerPlay($event)"
-                @pause="onPlayerPause($event)"
-                @ended="onPlayerEnded($event)"
-                @loadeddata="onPlayerLoadeddata($event)"
-                @waiting="onPlayerWaiting($event)"
-                @playing="onPlayerPlaying($event)"
-                @timeupdate="onPlayerTimeupdate($event)"
-                @canplay="onPlayerCanplay($event)"
-                @canplaythrough="onPlayerCanplaythrough($event)"
                 @ready="playerReadied"
-                @statechanged="playerStateChanged($event)"
               />
             </v-layout>
           </v-card-text>
         </v-card>
       </v-flex>
     </v-layout>
+    <v-layout
+      v-else
+      row
+      wrap
+      style="background-color:#303030; max-height:100% !important;"
+    >
+      <LiveLectureEnded />
+    </v-layout>
   </v-container>
 </template>
 
 <script>
+//Live chat library
+import Pusher from "pusher-js";
+import moment from "moment";
 // custom skin css
 import "../../styles/custom/video-theme.css";
-
+import LiveLectureEnded from "../error/LiveLectureEnded.vue";
 export default {
+  components: { LiveLectureEnded: LiveLectureEnded },
   data() {
     return {
+      selectedContentId: "",
+      liveLectureStatus: true,
+      content: {},
+      contents: [],
       // videojs options
       playerOptions: {
         autoplay: false,
@@ -183,115 +201,71 @@ export default {
         {
           id: "3",
           title: "This is note 3"
-        },
-        {
-          id: "4",
-          title: "This is note 4"
-        },
-        {
-          id: "5",
-          title: "This is note 5"
         }
       ],
       newMessage: "",
-      messages: [
-        {
-          id: "1",
-          user: "Alan",
-          content: "hello there"
-        },
-        {
-          id: "2",
-          user: "Bill",
-          content: "hiiii"
-        },
-        {
-          id: "3",
-          user: "Charlie",
-          content: "heyyy"
-        },
-        {
-          id: "4",
-          user: "Dohn",
-          content: "hello there"
-        },
-        {
-          id: "5",
-          user: "Ethan",
-          content: "hiiii"
-        },
-        {
-          id: "6",
-          user: "Fanny",
-          content: "heyyy"
-        }
-      ],
-      username: "Bill",
+      messages: [],
+      username: ""
     };
   },
-  computed: {
-    player() {
-      return this.$refs.videoPlayer.player;
-    }
-  },
-  mounted() {
-    // console.log('this is current player instance object', this.player)
-    setTimeout(() => {
-      console.log("dynamic change options", this.player);
-      // change src
-      // this.playerOptions.sources[0].src = 'https://cdn.theguardian.tv/webM/2015/07/20/150716YesMen_synd_768k_vp8.webm';
-      // change item
-      // this.$set(this.playerOptions.sources, 0, {
-      //   type: "video/mp4",
-      //   src: 'https://cdn.theguardian.tv/webM/2015/07/20/150716YesMen_synd_768k_vp8.webm',
-      // })
-      // change array
-      // this.playerOptions.sources = [{
-      //   type: "video/mp4",
-      //   src: 'https://cdn.theguardian.tv/webM/2015/07/20/150716YesMen_synd_768k_vp8.webm',
-      // }]
-      this.player.muted(false);
-    }, 5000);
+  created() {
+    //Check whether if there's any live lectures on going
+    //Get userid & username
+    let userId = $cookies.get("userid");
+    this.username = $cookies.get("username");
+    this.$store.dispatch("GETUSERCONTENT", userId).then(response => {
+      //Check each and every content
+      //See if current date time is before 2hours of content date time
+      //If yes = live lecture
+      for (var i = 0; i < response.data.length; i++) {
+        if (response.data[i].type == "lecture") {
+          this.contents.push(response.data[i]);
+        }
+      }
+      //Check if there's any live lectures going on.
+      //If there isn't, display no live lectures page
+      if (this.contents.length > 0) {
+        //By default it will load the first live lecture
+        this.content = this.contents[0];
+        this.liveChatConfigs();
+      } else {
+        this.liveLectureStatus = true;
+      }
+    });
   },
   methods: {
-    // listen event
-    onPlayerPlay(player) {
-      // console.log('player play!', player)
+    liveChatConfigs() {
+      //Subscribe to the channel
+      this.subscribeChannel(this.content.contentId);
+      this.getAllChat(this.content.contentId);
+      this.playerOptions.sources[0].src = this.content.url;
     },
-    onPlayerPause(player) {
-      // console.log('player pause!', player)
+    changeLiveLecture() {
+      var contentIndex = this.contents.findIndex(
+        x => x.contentId === this.selectedContentId
+      );
+      this.content = this.contents[contentIndex];
+      this.liveChatConfigs();
     },
-    onPlayerEnded(player) {
-      // console.log('player ended!', player)
+    subscribeChannel(lectureId) {
+      var pusher = new Pusher("0a3b3bc361a655ea56ac", {
+        cluster: "ap1",
+        forceTLS: true
+      });
+      pusher.subscribe(lectureId);
+      pusher.bind("my-event", data => {
+        this.messages.push(data);
+        this.scrollTo();
+      });
     },
-    onPlayerLoadeddata(player) {
-      // console.log('player Loadeddata!', player)
-    },
-    onPlayerWaiting(player) {
-      // console.log('player Waiting!', player)
-    },
-    onPlayerPlaying(player) {
-      // console.log('player Playing!', player)
-    },
-    onPlayerTimeupdate(player) {
-      // console.log('player Timeupdate!', player.currentTime())
-    },
-    onPlayerCanplay(player) {
-      // console.log('player Canplay!', player)
-    },
-    onPlayerCanplaythrough(player) {
-      // console.log('player Canplaythrough!', player)
-    },
-    // or listen state event
-    playerStateChanged(playerCurrentState) {
-      // console.log('player current update state', playerCurrentState)
+    getAllChat(lectureId) {
+      this.$store.dispatch("GETALLCHAT", lectureId).then(response => {
+        this.messages = response.data;
+      });
     },
     // player is ready
     playerReadied(player) {
-      // seek to 10s
-      console.log("Player readied", player);
-      player.currentTime(10);
-      // console.log('example 01: the player is readied', player)
+      player.currentTime(0);
     },
     addNote() {
       var item = {
@@ -315,14 +289,16 @@ export default {
       }
     },
     addComment() {
-      var item = {
-        id: Math.random(),
-        user: this.username,
-        content: this.newMessage
+      var comment = {
+        lectureId: this.content.contentId,
+        userName: this.username,
+        message: this.newMessage,
+        dateTime: moment(new Date())
       };
-      this.messages.push(item);
-      this.newMessage = "";
-      this.scrollTo();
+      this.$store.dispatch("SENDPUSHERMESSAGE", comment).then(response => {
+        this.newMessage = "";
+        this.scrollTo();
+      });
     },
     scrollTo() {
       this.$nextTick(() => {
@@ -338,7 +314,7 @@ export default {
 <style>
 .video-js {
   position: relative !important;
-  height: 100vh !important;
+  height: 99vh !important;
 }
 
 .vjs-poster {
@@ -362,7 +338,6 @@ export default {
 
 .chatBox .content {
   max-width: 50%;
-  background-color: #e6e5eb;
   border-radius: 10px;
   display: inline-block;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14),

@@ -614,9 +614,6 @@ export default {
           this.message = "Create Error, Please try again later";
         });
       this.close();
-      this.DiscussionList.push(this.editedDiscussion);
-      this.pagination.totalItems = this.DiscussionList.length;
-      this.close();
     },
 
     submitEditDiscussion() {

@@ -25,9 +25,10 @@
             <v-layout style="max-width:100%;">
               <v-flex
                 sm12
-                md6
+                md5
               >
                 <v-text-field
+                  v-model.lazy="search"
                   class="pr-0 pt-3 pb-0 pl-3"
                   append-icon="search"
                   label="Search"
@@ -38,13 +39,17 @@
 
               <v-flex
                 sm12
-                md6
+                md7
               >
                 <v-select
-                  :items="discussionTypes"
+                  v-model="searchCourseId"
+                  :items="courses"
+                  item-text="courseName"
+                  item-value="courseId"
+                  label="Courses"
                   class="pr-3 pt-3 pb-0 pl-0"
-                  label="Categories"
                   dense
+                  @input="searchByCourse"
                 />
               </v-flex>
             </v-layout>
@@ -64,16 +69,8 @@
             </template>
 
             <template v-for="(item, index) in discussions">
-              <v-subheader
-                v-if="item.header"
-                :key="item.header"
-              >
-                {{ item.header }}
-              </v-subheader>
-
               <v-list-tile
-                v-else
-                :key="item.id"
+                :key="item.postId"
                 avatar
                 @click="displayDiscussion(item)"
               >
@@ -83,7 +80,9 @@
 
                 <v-list-tile-content>
                   <v-list-tile-title> {{ item.title }}</v-list-tile-title>
-                  <v-list-tile-sub-title>{{ item.body }}</v-list-tile-sub-title>
+                  <v-list-tile-sub-title>
+                    {{ stripHTML(item.description) }}
+                  </v-list-tile-sub-title>
                 </v-list-tile-content>
               </v-list-tile>
               <v-divider
@@ -132,9 +131,7 @@
         class="discussion-page-padding"
       >
         <v-card height="100%">
-          <v-card-title
-            class="discussion-title-color"
-          >
+          <v-card-title class="discussion-title-color">
             <span
               class="headline white--text font-weight-thin pa-2"
             >New Discussion</span>
@@ -164,18 +161,36 @@
                     md12
                   >
                     <v-text-field
+                      v-model="newDiscussion.title"
                       label="Title"
                       required
                     />
                   </v-flex>
                   <v-flex
                     xs12
-                    sm12
-                    md12
+                    sm6
+                    md6
                   >
                     <v-select
-                      :items="discussionTypes"
-                      label="Category"
+                      v-model="newDiscussion.courseId"
+                      :items="courses"
+                      item-text="courseName"
+                      item-value="courseId"
+                      label="Course"
+                      @input="changeCourseFolders()"
+                    />
+                  </v-flex>
+                  <v-flex
+                    xs12
+                    sm6
+                    md6
+                  >
+                    <v-select
+                      v-model="newDiscussion.courseFolderId"
+                      :items="selectedCourseFolders"
+                      item-text="name"
+                      item-value="courseFolderId"
+                      label="Course Folder"
                     />
                   </v-flex>
                   <v-flex
@@ -183,7 +198,10 @@
                     sm12
                     md12
                   >
-                    <ckeditor :editor="editor" />
+                    <ckeditor
+                      v-model="newDiscussion.description"
+                      :editor="editor"
+                    />
                   </v-flex>
                 </v-layout>
               </v-container>
@@ -192,10 +210,16 @@
 
           <v-card-actions>
             <v-spacer />
-            <v-btn color="warning">
+            <v-btn
+              color="warning"
+              @click="newDiscussion = {}"
+            >
               Clear
             </v-btn>
-            <v-btn color="blue">
+            <v-btn
+              color="blue"
+              @click="createDiscussion"
+            >
               Post
             </v-btn>
           </v-card-actions>
@@ -214,9 +238,7 @@
             class="scroll-y discussion-thread"
             three-line
           >
-            <v-card-title
-              class="discussion-title-fixed"
-            >
+            <v-card-title class="discussion-title-fixed">
               <span
                 class="headline white--text font-weight-thin pa-2"
               >View Discussion</span>
@@ -247,9 +269,7 @@
                     class="pa-3"
                     hover
                   >
-                    <v-container
-                      fluid
-                    >
+                    <v-container fluid>
                       <v-layout column>
                         <span class="headline font-weight-light pt-3">{{
                           selectedDiscussion.title
@@ -259,14 +279,17 @@
                         }}</span>
                       </v-layout>
                     </v-container>
-                    <v-card-text>{{ selectedDiscussion.body }}</v-card-text>
+                    <v-card-text>
+                      {{ stripHTML(selectedDiscussion.description) }}
+                    </v-card-text>
                     <v-card-actions class="pa-0 ml-2">
                       <v-chip
                         small
                         color="secondary"
                         class="white--text"
                       >
-                        From: {{ selectedDiscussion.createdby }}
+                        From:
+                        {{ fetchNameFromUserId(selectedDiscussion.createdBy) }}
                       </v-chip>
                       <v-btn
                         icon
@@ -298,8 +321,8 @@
                         v-model="newComment"
                         append-outer-icon="send"
                         class="mx-2"
-                        label="Message to send" 
-                        rows="2" 
+                        label="Message to send"
+                        rows="2"
                         @click:append-outer="addComment(newComment)"
                       />
                     </v-flex>
@@ -319,14 +342,14 @@
                           class="pa-3"
                           hover
                         >
-                          <v-card-text>{{ item.body }}</v-card-text>
+                          <v-card-text>{{ item.description }}</v-card-text>
                           <v-card-actions class="pa-0 ml-2">
                             <v-chip
                               small
                               color="secondary"
                               class="white--text"
                             >
-                              From: {{ item.createdby }}
+                              From: {{ fetchNameFromUserId(item.createdBy) }}
                             </v-chip>
                             <v-btn
                               icon
@@ -356,10 +379,26 @@
         </v-card>
       </v-flex>
     </v-layout>
+    <v-snackbar
+      v-model="snackbar"
+      :color="color"
+      :top="true"
+    >
+      {{ message }}
+      <v-btn
+        dark
+        flat
+        @click="snackbar = false"
+      >
+        Close
+      </v-btn>
+    </v-snackbar>
   </v-container>
 </template>
 
 <script>
+import moment from "moment";
+var striptags = require("striptags");
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 export default {
@@ -381,102 +420,180 @@ export default {
           ]
         }
       },
+      search: "",
+      searchCourseId: "",
       page: "default",
       commentBox: false,
       newComment: "",
+      users: [],
+      courses: [],
+      courseFolders: [],
+      selectedCourseFolders: [],
       discussionTypes: ["Lecture", "Tutorial", "Assignment", "Exam"],
       discussImg: require("@/assets/default/discussion.png"),
-      discussions: [
-        { header: "Today" },
-        {
-          id: "d1",
-          title: "Question 1",
-          body:
-            "Alan - Dear Prof, can you answer this question? Thank you!",
-          createdby: "Alan"
-        },
-        {
-          id: "d2",
-          title: "Question 2",
-          body:
-            "Bill - Dear Prof, can you answer this question? Thank you!",
-          createdby: "Bill"
-        },
-        {
-          id: "d3",
-          title: "Question 3",
-          body:
-            "Charlie - Dear Prof, can you answer this question? Thank you!",
-          createdby: "Charlie"
-        },
-        {
-          id: "d4",
-          title: "Question 4",
-          body:
-            "David - Dear Prof, can you answer this question? Thank you!",
-          createdby: "David"
-        },
-        {
-          id: "d5",
-          title: "Question 5",
-          body:
-            "Evan - Dear Prof, can you answer this question? Thank you!",
-          createdby: "Evan"
-        }
-      ],
-      discussionPosts: [
-        {
-          id: "dp1",
-          body: "Here's comment number 1. Can you see it?",
-          createdby: "Alan"
-        },
-        {
-          id: "dp2",
-          body: "Here's comment number 2. Can you see it?",
-          createdby: "Bill"
-        },
-        {
-          id: "dp3",
-          body: "Here's comment number 3. Can you see it?",
-          createdby: "Charlie"
-        },
-        {
-          id: "dp4",
-          body: "Here's comment number 4. Can you see it?",
-          createdby: "David"
-        },
-        {
-          id: "dp5",
-          body: "Here's comment number 5. Can you see it?",
-          createdby: "Evan"
-        }
-      ],
-      selectedDiscussion: {}
+      discussions: [],
+      discussionPosts: [],
+      discussionPostsUser: [],
+      newDiscussion: {},
+      selectedDiscussion: {},
+      snackbar: false,
+      color: "general",
+      message: "",
+      username: ""
     };
   },
+  watch: {
+    search: {
+      handler(input) {
+        this.searchPosts(input);
+      }
+    }
+  },
+  created() {
+    this.getAllUsers();
+    this.fetchUserCourses();
+    this.fetchAllCourseFolders();
+    this.fetchUserRelatedDiscussions();
+  },
   methods: {
+    stripHTML(item) {
+      let text = striptags(item);
+      return text;
+    },
+    searchPosts(input) {
+      if (input.length > 3 || input.length == 0) {
+        this.fetchUserRelatedDiscussions();
+      }
+    },
+    searchByCourse() {
+      this.fetchUserRelatedDiscussions();
+    },
+    changeCourseFolders() {
+      this.$store.dispatch("GETCOURSEFOLDERS", this.newDiscussion.courseId).then(response => {
+        this.selectedCourseFolders = response.data;
+      });
+    },
+    getAllUsers() {
+      this.$store
+        .dispatch("GETALLUSERS")
+        .then(response => {
+          this.users = response.data.userDtos;
+        })
+        .catch(err => {
+          this.snackbar = true;
+          this.color = "error";
+          this.message = "Error, Please try again later";
+        });
+    },
+    fetchUserCourses() {
+      //Get the list of courses first
+      //For Dropdownlist
+      //get userId
+      let userId = $cookies.get("userid");
+      this.$store
+        .dispatch("GETUSERCOURSES", userId)
+        .then(response => {
+          this.courses = response.data;
+        })
+        .catch(err => {
+          this.snackbar = true;
+          this.color = "error";
+          this.message = "Error, Please try again later";
+        });
+    },
+    fetchAllCourseFolders() {
+      this.$store
+        .dispatch("GETALLCOURSEFOLDERS")
+        .then(response => {
+          this.courseFolders = response.data;
+        })
+        .catch(err => {
+          this.snackbar = true;
+          this.color = "error";
+          this.message = "Error, Please try again later";
+        });
+    },
+    fetchUserRelatedDiscussions() {
+      //Get userid
+      let userId = $cookies.get("userid");
+      var item = {
+        userId: userId,
+        courseId: this.searchCourseId,
+        keyword: this.search
+      };
+      this.$store.dispatch("GETUSERCOURSEDISCUSSIONS", item).then(response => {
+        this.discussions = response.data;
+      });
+    },
+    fetchNameFromUserId(userId) {
+      //Temp solution
+      //Get all users and save to array
+      //Search and return by id
+  var userIndex = this.users.findIndex(x => x.userId === userId);
+      return this.users[userIndex].userName;
+    },
     displayDiscussion(discussionPost) {
       this.page = "view-discussion";
       this.selectedDiscussion = {};
+      this.selectedDiscussion.postId = discussionPost.postId;
       this.selectedDiscussion.title = discussionPost.title;
-      this.selectedDiscussion.body = discussionPost.body;
-      this.selectedDiscussion.datetime = "01/03/20 20:30:00pm";
-      this.selectedDiscussion.createdby = discussionPost.createdby;
+      this.selectedDiscussion.description = discussionPost.description;
+      this.selectedDiscussion.datetime = moment(
+        discussionPost.createdOn
+      ).format("DD/MM/YY HH:mm:ss");
+      this.selectedDiscussion.createdBy = discussionPost.createdBy;
+      this.$store
+        .dispatch("GETPOSTREPLIES", discussionPost.postId)
+        .then(response => {
+          this.discussionPosts = response.data;
+        });
+      //Display Discussion Posts
+      //Future enhancements - differentate posts from lecturer and student
+      /* var lecturerReplies = discussionPost.lecturerReply;
+      var studentReplies = discussionPost.studentReply;
+      var totalReplies = lecturerReplies.concat(studentReplies); */
+    },
+    addComment(message) {
+      var newReply = {};
+      newReply.postId = this.selectedDiscussion.postId;
+      newReply.description = message;
+      newReply.role = $cookies.get("role");
+      newReply.userName = $cookies.get("username");
+      newReply.isEdited = true;
+      newReply.createdOn = moment(new Date());
+      newReply.createdBy = $cookies.get("userid");
+      this.$store.dispatch("CREATEPOSTREPLY", newReply).then(response => {
+        this.discussionPosts.push(newReply);
+        this.newComment = "";
+      });
+    },
+    createDiscussion() {
+      //Add all the required fields before passing it over
+      this.newDiscussion.createdBy = $cookies.get("userid");
+      this.newDiscussion.createdOn = moment(new Date());
+      this.newDiscussion.userName = $cookies.get("username");
+      var id = this.newDiscussion.courseFolderId;
 
-      //Fetch related posts
-      //displayDiscussionPost(discussionPost.id);
-    },
-    displayDiscussionPost(id) {
-      //Fetch discussion posts by id
-    },
-    addComment(message){
-      var item = {
-        id: "dp1",
-        body: message,
-        createdby: "Alan"
-      }
-      this.newComment = "";
-      this.discussionPosts.push(item);
+      this.newDiscussion.courseFolderId = [];
+      this.newDiscussion.courseFolderId.push(id);
+      var item = this.newDiscussion;
+      delete item.courseName;
+      delete item.courseFolderName;
+
+      this.$store
+        .dispatch("CREATEDISCUSSION", item)
+        .then(response => {
+          this.discussions.push(item);
+          //Clear selectedCourseFolder & newDiscussion
+          this.selectedCourseFolders = [];
+          this.newDiscussion = {};
+          this.page = "default";
+        })
+        .catch(err => {
+          this.snackbar = true;
+          this.color = "error";
+          this.message = "Create Error, Please try again later";
+        });
     }
   }
 };
