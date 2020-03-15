@@ -85,6 +85,12 @@
                     {{ stripHTML(item.description) }}
                   </v-list-tile-sub-title>
                 </v-list-tile-content>
+
+                <v-list-tile-action>
+                  <v-list-tile-action-text>
+                    {{ moment(item.createdOn).fromNow() }}
+                  </v-list-tile-action-text>
+                </v-list-tile-action>
               </v-list-tile>
               <v-divider
                 :key="index"
@@ -360,6 +366,7 @@
                           hover
                         >
                           <v-card-text>{{ item.description }}</v-card-text>
+
                           <v-card-actions class="pa-0 ml-2">
                             <v-chip
                               small
@@ -367,6 +374,13 @@
                               class="white--text"
                             >
                               From: {{ fetchNameFromUserId(item.createdBy) }}
+                            </v-chip>
+                            <v-chip
+                              small
+                              color="blue"
+                              class="white--text"
+                            >
+                              {{ moment(item.createdOn).fromNow() }}
                             </v-chip>
                             <v-btn
                               icon
@@ -538,7 +552,8 @@ export default {
       var item = {
         userId: userId,
         courseId: this.searchCourseId,
-        keyword: this.search
+        keyword: this.search,
+        OrderBy: "createdOn"
       };
       this.$store.dispatch("GETUSERCOURSEDISCUSSIONS", item).then(response => {
         this.discussions = response.data;

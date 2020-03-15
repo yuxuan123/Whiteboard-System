@@ -225,7 +225,7 @@ export default {
 
   GETUSERCOURSEDISCUSSIONS({ commit }, payload) {
     return new Promise((resolve, reject) => {
-      axios.get(API_URL + '/getPost/' + payload.userId, { params: { userId: payload.userId, courseId: payload.courseId, keyword: payload.keyword } })
+      axios.get(API_URL + '/getPost/' + payload.userId, { params: { userId: payload.userId, courseId: payload.courseId, keyword: payload.keyword, OrderBy: payload.OrderBy } })
         .then(response => {
           resolve(response)
         })
