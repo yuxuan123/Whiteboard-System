@@ -72,9 +72,10 @@
               <v-list-tile
                 :key="item.postId"
                 avatar
+                class="pa-2"
                 @click="displayDiscussion(item)"
               >
-                <v-list-tile-avatar>
+                <v-list-tile-avatar class="pt-3">
                   <img src="https://bit.ly/2VyYYzy">
                 </v-list-tile-avatar>
 
@@ -271,9 +272,25 @@
                   >
                     <v-container fluid>
                       <v-layout column>
-                        <span class="headline font-weight-light pt-3">{{
-                          selectedDiscussion.title
-                        }}</span>
+                        <v-flex>
+                          <span class="headline font-weight-light pt-3">{{
+                            selectedDiscussion.title
+                          }}</span>
+                          <v-chip
+                            outline
+                            color="primary"
+                            style="margin-top:-3px;margin-left:10px;"
+                          >
+                            {{ selectedDiscussion.courseName }}
+                          </v-chip>
+                          <v-chip
+                            outline
+                            color="secondary"
+                            style="margin-top:-3px;margin-left:10px;"
+                          >
+                            {{ selectedDiscussion.courseFolderName }}
+                          </v-chip>
+                        </v-flex>
                         <span class="subtitle-1 font-weight-light pa-1">{{
                           selectedDiscussion.datetime
                         }}</span>
@@ -540,6 +557,28 @@ export default {
       this.page = "view-discussion";
       this.selectedDiscussion = {};
       this.selectedDiscussion.postId = discussionPost.postId;
+      //Convert course and course folder index to name
+      var courseIndex = this.courses.findIndex(
+        x => x.courseId === discussionPost.courseId
+      );
+      var courseFolderIndex = this.courseFolders.findIndex(
+        x => x.courseFolderId === discussionPost.courseFolderId[0]
+      );
+      if (courseIndex != -1) {
+        this.selectedDiscussion.courseName = this.courses[
+          courseIndex
+        ].courseName;
+      } else {
+        this.selectedDiscussion.courseName = "N/A";
+      }
+
+      if (courseFolderIndex != -1) {
+        this.selectedDiscussion.courseFolderName = this.courseFolders[
+          courseFolderIndex
+        ].name;
+      } else {
+        this.selectedDiscussion.courseFolderName = "No folder";
+      }
       this.selectedDiscussion.title = discussionPost.title;
       this.selectedDiscussion.description = discussionPost.description;
       this.selectedDiscussion.datetime = moment(
