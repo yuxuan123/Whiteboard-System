@@ -75,10 +75,10 @@ export default [
       {
         path: "",
         meta: {
-          name: "Announcements",
+          name: "Landing",
           requiresAuth: true
         },
-        component: () => import(`@/components/dashboard/announcement.vue`)
+        component: () => import(`@/components/dashboard/landing.vue`)
       },
       {
         path: "announcement",
