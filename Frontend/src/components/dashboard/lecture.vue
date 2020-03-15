@@ -30,16 +30,7 @@
                 <v-flex
                   style="position: sticky;top: 0;z-index: 999;background-color:#ffffff;"
                 >
-                  <v-select
-                    v-model="selectedContentId"
-                    :items="contents"
-                    item-text="title"
-                    item-value="contentId"
-                    label="Live Lecture Courses"
-                    class="pa-0"
-                    dense
-                    @input="changeLiveLecture"
-                  />
+                <h4 class="mt-0">{{content.title}}</h4>
                   <v-text-field
                     v-model="newNote"
                     counter="50"
@@ -169,7 +160,6 @@ export default {
   components: { LiveLectureEnded: LiveLectureEnded },
   data() {
     return {
-      selectedContentId: "",
       liveLectureStatus: true,
       content: {},
       contents: [],
@@ -239,13 +229,6 @@ export default {
       this.subscribeChannel(this.content.contentId);
       this.getAllChat(this.content.contentId);
       this.playerOptions.sources[0].src = this.content.url;
-    },
-    changeLiveLecture() {
-      var contentIndex = this.contents.findIndex(
-        x => x.contentId === this.selectedContentId
-      );
-      this.content = this.contents[contentIndex];
-      this.liveChatConfigs();
     },
     subscribeChannel(lectureId) {
       var pusher = new Pusher("0a3b3bc361a655ea56ac", {

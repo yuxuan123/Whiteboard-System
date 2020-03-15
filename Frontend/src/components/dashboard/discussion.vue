@@ -72,9 +72,10 @@
               <v-list-tile
                 :key="item.postId"
                 avatar
+                class="discussionList"
                 @click="displayDiscussion(item)"
               >
-                <v-list-tile-avatar>
+                <v-list-tile-avatar class="pt-3">
                   <img src="https://bit.ly/2VyYYzy">
                 </v-list-tile-avatar>
 
@@ -84,6 +85,12 @@
                     {{ stripHTML(item.description) }}
                   </v-list-tile-sub-title>
                 </v-list-tile-content>
+
+                <v-list-tile-action>
+                  <v-list-tile-action-text>
+                    {{ moment(item.createdOn).fromNow() }}
+                  </v-list-tile-action-text>
+                </v-list-tile-action>
               </v-list-tile>
               <v-divider
                 :key="index"
@@ -271,9 +278,25 @@
                   >
                     <v-container fluid>
                       <v-layout column>
-                        <span class="headline font-weight-light pt-3">{{
-                          selectedDiscussion.title
-                        }}</span>
+                        <v-flex>
+                          <span class="headline font-weight-light pt-3">{{
+                            selectedDiscussion.title
+                          }}</span>
+                          <v-chip
+                            outline
+                            color="primary"
+                            style="margin-top:-3px;margin-left:10px;"
+                          >
+                            {{ selectedDiscussion.courseName }}
+                          </v-chip>
+                          <v-chip
+                            outline
+                            color="secondary"
+                            style="margin-top:-3px;margin-left:10px;"
+                          >
+                            {{ selectedDiscussion.courseFolderName }}
+                          </v-chip>
+                        </v-flex>
                         <span class="subtitle-1 font-weight-light pa-1">{{
                           selectedDiscussion.datetime
                         }}</span>
@@ -343,6 +366,7 @@
                           hover
                         >
                           <v-card-text>{{ item.description }}</v-card-text>
+
                           <v-card-actions class="pa-0 ml-2">
                             <v-chip
                               small
@@ -350,6 +374,13 @@
                               class="white--text"
                             >
                               From: {{ fetchNameFromUserId(item.createdBy) }}
+                            </v-chip>
+                            <v-chip
+                              small
+                              color="blue"
+                              class="white--text"
+                            >
+                              {{ moment(item.createdOn).fromNow() }}
                             </v-chip>
                             <v-btn
                               icon
@@ -469,9 +500,11 @@ export default {
       this.fetchUserRelatedDiscussions();
     },
     changeCourseFolders() {
-      this.$store.dispatch("GETCOURSEFOLDERS", this.newDiscussion.courseId).then(response => {
-        this.selectedCourseFolders = response.data;
-      });
+      this.$store
+        .dispatch("GETCOURSEFOLDERS", this.newDiscussion.courseId)
+        .then(response => {
+          this.selectedCourseFolders = response.data;
+        });
     },
     getAllUsers() {
       this.$store
@@ -519,7 +552,8 @@ export default {
       var item = {
         userId: userId,
         courseId: this.searchCourseId,
-        keyword: this.search
+        keyword: this.search,
+        OrderBy: "createdOn"
       };
       this.$store.dispatch("GETUSERCOURSEDISCUSSIONS", item).then(response => {
         this.discussions = response.data;
@@ -529,13 +563,37 @@ export default {
       //Temp solution
       //Get all users and save to array
       //Search and return by id
-  var userIndex = this.users.findIndex(x => x.userId === userId);
-      return this.users[userIndex].userName;
+      var userIndex = this.users.findIndex(x => x.userId === userId);
+      if (userIndex != -1) {
+        return this.users[userIndex].userName;
+      }
     },
     displayDiscussion(discussionPost) {
       this.page = "view-discussion";
       this.selectedDiscussion = {};
       this.selectedDiscussion.postId = discussionPost.postId;
+      //Convert course and course folder index to name
+      var courseIndex = this.courses.findIndex(
+        x => x.courseId === discussionPost.courseId
+      );
+      var courseFolderIndex = this.courseFolders.findIndex(
+        x => x.courseFolderId === discussionPost.courseFolderId[0]
+      );
+      if (courseIndex != -1) {
+        this.selectedDiscussion.courseName = this.courses[
+          courseIndex
+        ].courseName;
+      } else {
+        this.selectedDiscussion.courseName = "N/A";
+      }
+
+      if (courseFolderIndex != -1) {
+        this.selectedDiscussion.courseFolderName = this.courseFolders[
+          courseFolderIndex
+        ].name;
+      } else {
+        this.selectedDiscussion.courseFolderName = "No folder";
+      }
       this.selectedDiscussion.title = discussionPost.title;
       this.selectedDiscussion.description = discussionPost.description;
       this.selectedDiscussion.datetime = moment(
@@ -600,4 +658,11 @@ export default {
 </script>
 <style>
 @import url("../../styles/custom/discussion.css");
+
+.discussionList a{
+  padding-top: 20px !important;
+  padding-bottom: 20px !important;
+  padding-left: 30px !important;
+  padding-right: 30px !important;
+}
 </style>
