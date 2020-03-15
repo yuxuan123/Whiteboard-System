@@ -469,9 +469,11 @@ export default {
       this.fetchUserRelatedDiscussions();
     },
     changeCourseFolders() {
-      this.$store.dispatch("GETCOURSEFOLDERS", this.newDiscussion.courseId).then(response => {
-        this.selectedCourseFolders = response.data;
-      });
+      this.$store
+        .dispatch("GETCOURSEFOLDERS", this.newDiscussion.courseId)
+        .then(response => {
+          this.selectedCourseFolders = response.data;
+        });
     },
     getAllUsers() {
       this.$store
@@ -529,8 +531,10 @@ export default {
       //Temp solution
       //Get all users and save to array
       //Search and return by id
-  var userIndex = this.users.findIndex(x => x.userId === userId);
-      return this.users[userIndex].userName;
+      var userIndex = this.users.findIndex(x => x.userId === userId);
+      if (userIndex != -1) {
+        return this.users[userIndex].userName;
+      }
     },
     displayDiscussion(discussionPost) {
       this.page = "view-discussion";

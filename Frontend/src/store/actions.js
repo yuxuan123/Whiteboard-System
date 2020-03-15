@@ -38,7 +38,7 @@ export default {
   // Without Params
   GETALLUSERS({ commit }, pagination) {
     return new Promise((resolve, reject) => {
-      axios.get(API_URL + '/getAllUsers')
+      axios.get(API_URL + '/getAllUsers', { params: { PageNumber: "0", PageSize: "100" }})
         .then(response => {
           resolve(response)
         })
