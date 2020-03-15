@@ -223,9 +223,45 @@ export default {
     })
   },
 
+  ADDCOURSESTAFF({ commit }, payload){
+    return new Promise((resolve, reject) => {
+      axios.post(API_URL + "/addCourseStaff", [payload])
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
   GETUSERCOURSEDISCUSSIONS({ commit }, payload) {
     return new Promise((resolve, reject) => {
       axios.get(API_URL + '/getPost/' + payload.userId, { params: { userId: payload.userId, courseId: payload.courseId, keyword: payload.keyword, OrderBy: payload.OrderBy } })
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  DELETECOURSE({commit}, courseId){
+    return new Promise((resolve, reject) => {
+      axios.delete(API_URL + '/deleteCourse/' + courseId)
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  DELETECONTENT({ commit }, contentId){
+    return new Promise((resolve, reject) => {
+      axios.delete(API_URL + '/deleteContent/' + contentId)
         .then(response => {
           resolve(response)
         })
