@@ -30,7 +30,9 @@
                 <v-flex
                   style="position: sticky;top: 0;z-index: 999;background-color:#ffffff;"
                 >
-                <h4 class="mt-0">{{content.title}}</h4>
+                  <h4 class="mt-0">
+                    {{ content.title }}
+                  </h4>
                   <v-text-field
                     v-model="newNote"
                     counter="50"
@@ -160,7 +162,7 @@ export default {
   components: { LiveLectureEnded: LiveLectureEnded },
   data() {
     return {
-      liveLectureStatus: true,
+      liveLectureStatus: false,
       content: {},
       contents: [],
       // videojs options
@@ -216,10 +218,9 @@ export default {
       //If there isn't, display no live lectures page
       if (this.contents.length > 0) {
         //By default it will load the first live lecture
+        this.liveLectureStatus = true;
         this.content = this.contents[0];
         this.liveChatConfigs();
-      } else {
-        this.liveLectureStatus = true;
       }
     });
   },
