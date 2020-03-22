@@ -1,74 +1,39 @@
 <template>
-  <v-container
-    fluid
-    grid-list-xl
-    fill-height
-  >
+  <v-container fluid grid-list-xl fill-height>
     <v-layout justify-center>
       <v-flex xs12>
         <material-card color="general">
           <div slot="header">
-            <div class="title font-weight-light mb-2">
-              Courses
-            </div>
+            <div class="title font-weight-light mb-2">Courses</div>
           </div>
-          <v-flex
-            md12
-            sm12
-          >
+          <v-flex md12 sm12>
             <div>
-              <v-dialog
-                v-model="dialog"
-                width="600px"
-              >
+              <v-dialog v-model="dialog" width="600px">
                 <template v-slot:activator="{ on }">
                   <v-btn
-                    v-if="$cookies.get('userid') != 'student'"
+                    v-if="userRole !== 'student'"
                     rounded
                     dark
                     class="general"
                     v-on="on"
-                  >
-                    Add Course
-                  </v-btn>
+                  >Add Course</v-btn>
                 </template>
                 <v-card>
                   <v-card-title>
                     <span class="headline">Create Course</span>
                   </v-card-title>
                   <v-card-text>
-                    <v-container
-                      class="pt-0"
-                      grid-list-md
-                    >
+                    <v-container class="pt-0" grid-list-md>
                       <v-layout wrap>
-                        <v-flex
-                          xs12
-                          sm6
-                          md6
-                        >
-                          <v-text-field
-                            v-model="createContent.CourseCode"
-                            label="Course Code"
-                          />
+                        <v-flex xs12 sm6 md6>
+                          <v-text-field v-model="createContent.CourseCode" label="Course Code" />
                         </v-flex>
 
-                        <v-flex
-                          xs12
-                          sm6
-                          md6
-                        >
-                          <v-text-field
-                            v-model="createContent.CourseName"
-                            label="Course Name"
-                          />
+                        <v-flex xs12 sm6 md6>
+                          <v-text-field v-model="createContent.CourseName" label="Course Name" />
                         </v-flex>
 
-                        <v-flex
-                          xs12
-                          sm12
-                          md12
-                        >
+                        <v-flex xs12 sm12 md12>
                           <v-text-field
                             v-model="createContent.CourseDescription"
                             label="Course Description"
@@ -79,13 +44,37 @@
                   </v-card-text>
                   <v-card-actions>
                     <v-spacer />
-                    <v-btn
-                      color="green darken-1"
-                      flat="flat"
-                      @click="addCourse"
-                    >
-                      Create
-                    </v-btn>
+                    <v-btn class="general" rounded dark @click="addCourse">Create</v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
+
+              <v-dialog v-model="dialogleafNode" width="600px">
+                <v-card>
+                  <v-card-title class="headline">Create document</v-card-title>
+
+                  <v-card-text>
+                    <v-container class="pt-0" grid-list-md>
+                      <v-layout wrap>
+
+                        <v-flex xs12 sm12 md12>
+                          <v-text-field v-model="createMaterial.MaterialName" label="document Name" />
+                        </v-flex>
+
+                        <v-flex xs12 sm12 md12>
+                          <v-text-field
+                            v-model="createMaterial.MaterialDescription"
+                            label="document Description"
+                          />
+                        </v-flex>
+                      </v-layout>
+                    </v-container>
+                  </v-card-text>
+
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+
+                    <v-btn class="general" rounded dark @click="addleafNode">Create</v-btn>
                   </v-card-actions>
                 </v-card>
               </v-dialog>
@@ -96,23 +85,13 @@
                 default-tree-node-name="new Course"
                 default-leaf-node-name="new Content"
                 :default-expanded="false"
-                @click="onClick"
                 @change-name="onChangeName"
                 @delete-node="deleteCourseCodeNode"
                 @add-node="onAddNode"
               >
-                <span
-                  slot="leafNodeIcon"
-                  class="icon"
-                >📃</span>
-                <span
-                  slot="treeNodeIcon"
-                  class="icon"
-                >📂</span>
-                <span
-                  slot
-                  class="icon"
-                >🌲</span>
+                <span slot="leafNodeIcon" class="icon">📃</span>
+                <span slot="treeNodeIcon" class="icon">📂</span>
+                <span slot class="icon">🌲</span>
               </vue-tree-list>
             </div>
           </v-flex>
@@ -121,7 +100,9 @@
     </v-layout>
   </v-container>
 </template>
+
 <script>
+import $ from "jquery";
 import { VueTreeList, Tree, TreeNode } from "vue-tree-list";
 export default {
   components: {
@@ -133,9 +114,11 @@ export default {
       courses: [],
       courseContents: [],
       createContent: {},
+      createMaterial:{},
       userId: "",
       userRole: "",
-      dialog: false
+      dialog: false,
+      dialogleafNode: false
     };
   },
   created() {
@@ -147,6 +130,17 @@ export default {
     //Get User courses or All Course
     //Add the course to tree
     this.getUserCourses();
+  },
+  mounted: function() {
+    let cur = this;
+    cur.$nextTick(function() {
+      setTimeout(function() {
+        // Code that will run only after the
+        // entire view has been rendered
+        cur.addButton();
+      }, 1000);
+      //zconsole.log(this.courseContents.length);
+    });
   },
   methods: {
     getUserCourses() {
@@ -180,7 +174,8 @@ export default {
           node = new TreeNode({
             //Set Default config for student
             isLeaf: false,
-            dragDisabled: true
+            dragDisabled: true,
+            addTreeNodeDisabled: true
           });
         }
         node.id = this.courses[i].courseId;
@@ -210,7 +205,8 @@ export default {
           } else {
             nodeleaf = new TreeNode({
               isLeaf: true,
-              dragDisabled: true
+              dragDisabled: true,
+              addTreeNodeDisabled: true
             });
           }
           (nodeleaf.id = this.courseContents[i].contentId),
@@ -261,6 +257,30 @@ export default {
           });
       }
     },
+    addButton() {
+      var body = document.getElementsByClassName("vtl-operation");
+      for (var i = 0; i < body.length; i++) {
+        // 1. Create the button
+        var button = document.createElement("button");
+        button.setAttribute("id", "btn" + i);
+        button.setAttribute("class", "general");
+        button.innerHTML = "Download";
+        button.style.color = "#ffffff";
+        button.style.float = "right";
+        // 2. Append somewhere
+        $(body[i]).append(button);
+      }
+      // 3. Add event handler
+      $(document).ready(function() {
+        for (var i = 0; i < body.length; i++) {
+          var btnID = "#btn" + i;
+
+          $(btnID).click(function() {
+            confirm("Do you want to download this?");
+          });
+        }
+      });
+    },
 
     regLecturerToCourse(courseId, createdBy) {
       var item = {
@@ -287,7 +307,29 @@ export default {
     },
 
     onAddNode(params) {
+      this.dialogleafNode = true;
+
       console.log(params.name);
+    },
+    addleafNode() {
+      let cur= this;
+      // var orgData = cur.courseCodeTree;
+      // // first layer
+      // for (var i = 0; i < orgData.children.length; i++) {
+      //   // second layer
+      //   for (var k = 0; k < orgData.children[i].children.length; k++) {
+      //     if (params.id == orgData.children[i].children[k].id) {
+      //       //edit the data from tree
+      //       orgData.children[i].children[k].id = 1;
+      //       orgData.children[i].children[k].name = "hihihi";
+      //       orgData.children[i].children[k].pid = "hihihi";
+            
+      //       break;
+      //     }
+      //   }
+      // }
+      cur.createMaterial = {};
+      cur.dialogleafNode = false;
     },
 
     addNode() {
@@ -297,19 +339,22 @@ export default {
     },
 
     onChangeName(params) {
+      var myObj = {
+        contentId: params.id,
+        courseId: params.id,
+        type: "null",
+        title: params.newName,
+        description: "null",
+        datetime: "0001-01-01T00:00:00Z",
+        fileName: params.newName + ".doc",
+        url: params.newName + ".doc",
+        createdOn: "0001-01-01T00:00:00Z",
+        createdBy: "d99dfc08-5d7a-4e04-c824-08d7c5959f4d"
+      };
+      this.axios
+        .put("https://whiteboardsyetem.azurewebsites.net/updateContent", myObj)
+        .then(function(response) {});
       console.log(params);
-    },
-
-    onClick(params) {
-      if (
-        params.name.charAt(0) !== "C" &&
-        params.name.charAt(0) !== "c" &&
-        params.name.charAt(0) !== "Z" &&
-        params.name.charAt() !== "z" &&
-        this.userRole === "student"
-      ) {
-        confirm("Do you want to download this?");
-      }
     }
   }
 };
@@ -331,5 +376,19 @@ export default {
 .vtl-node-content {
   padding: 10px !important;
   font-size: 18px !important;
+}
+button {
+  margin-left: 10px;
+  line-height: 60px;
+  font-weight: bold;
+  padding: 0 40px;
+  background: #337ab7;
+  border: #2e6da4;
+  border-radius: 1px;
+}
+button:hover {
+  color: #fff;
+  background: #337ab7;
+  border-radius: 25px;
 }
 </style>
