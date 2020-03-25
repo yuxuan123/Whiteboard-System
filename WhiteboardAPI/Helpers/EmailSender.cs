@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace WhiteboardAPI.Helpers
 
         public Task SendEmailAsync(string email, string subject, string message)
         {
-            return Execute("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", subject, message, email);
+            return Execute("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", subject, message, email);
         }
 
         private Task Execute(string apiKey, string subject, string message, string email)
@@ -24,7 +25,7 @@ namespace WhiteboardAPI.Helpers
             var client = new SendGridClient(apiKey);
             var msg = new SendGridMessage()
             {
-                From = new EmailAddress("ahmao@gmail.com", "Ah Mao"),
+                From = new EmailAddress("admin@whiteboard.com", "Whiteboard Admin"),
                 Subject = subject,
                 PlainTextContent = message,
                 HtmlContent = message
