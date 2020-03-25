@@ -18,17 +18,15 @@ namespace WhiteboardAPI.Controllers
         private IDiscussionBoardRepository _discussionBoardRepository;
         private readonly IMapper _mapper;
         private readonly AppSettings _appSettings;
-        private readonly IEmailSender _emailSender;
         private readonly IUrlHelper _urlHelper;
 
-        public CourseController(ICourseRepository courseRepository, IContentRepository contentRepository, IDiscussionBoardRepository discussionBoardRepository, IMapper mapper, IUrlHelper urlHelper, IOptions<AppSettings> appSettings, IEmailSender emailSender)
+        public CourseController(ICourseRepository courseRepository, IContentRepository contentRepository, IDiscussionBoardRepository discussionBoardRepository, IMapper mapper, IUrlHelper urlHelper, IOptions<AppSettings> appSettings)
         {
             _courseRepository = courseRepository;
             _contentRepository = contentRepository;
             _discussionBoardRepository = discussionBoardRepository;
             _mapper = mapper;
             _appSettings = appSettings.Value;
-            _emailSender = emailSender;
             _urlHelper = urlHelper;
         }
 

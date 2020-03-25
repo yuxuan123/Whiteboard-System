@@ -21,6 +21,7 @@ namespace WhiteboardAPI.Repository
         //void UpdatePassword(User user, string password);
         void DeleteUser(Guid userId);
         bool UserExists(Guid userId);
+        UserDE GetUserByEmail(string email);
         bool Save();
     }
 
@@ -182,6 +183,11 @@ namespace WhiteboardAPI.Repository
             }
 
             _context.tbl_user.Remove(user);
+        }
+
+        public UserDE GetUserByEmail(string email)
+        {
+            return _context.tbl_user.Where(x => x.Email == email).FirstOrDefault();
         }
 
         public bool Save()

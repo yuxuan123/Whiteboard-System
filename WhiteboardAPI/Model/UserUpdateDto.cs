@@ -20,4 +20,14 @@ namespace WhiteboardAPI.Model
 
         public List<Guid> CourseIds { get; set; }
     }
+
+    public class UserUpdatePasswordDto
+    {
+
+        [EmailAddress]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+        public string Password { get; set; }
+    }
 }
