@@ -309,5 +309,26 @@ namespace WhiteboardAPI.Controllers
             }
 
         }
+
+        [AllowAnonymous]
+        [HttpPost("ResetPassword")]
+        public IActionResult ResetPassword([FromBody] UserUpdatePasswordDto userUpdatePasswordDto)
+        {
+            if (userUpdatePasswordDto.Username == null)
+            {
+                return BadRequest("Please provide a username.");
+            }
+
+            var user = _userRepository.Authenticate(userUpdatePasswordDto.Username, userUpdatePasswordDto.OldPassword);
+
+            if (user == null)
+            {
+                return BadRequest("Incorrect current password entered.");
+            }
+
+            _userRepository.UpdatePassword(user, userUpdatePasswordDto.NewPassword);
+
+            return Ok("Password reset sucessfully");
+        }
     }
 }
