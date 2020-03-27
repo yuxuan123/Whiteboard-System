@@ -22,6 +22,7 @@ namespace WhiteboardAPI.Repository
         void DeleteUser(Guid userId);
         bool UserExists(Guid userId);
         UserDE GetUserByEmail(string email);
+        void UpdatePassword(UserDE user, string password);
         bool Save();
     }
 
@@ -188,6 +189,26 @@ namespace WhiteboardAPI.Repository
         public UserDE GetUserByEmail(string email)
         {
             return _context.tbl_user.Where(x => x.Email == email).FirstOrDefault();
+        }
+
+        public void UpdatePassword(UserDE user, string password)
+        {
+            byte[] passwordHash, passwordSalt;
+
+            if (string.IsNullOrWhiteSpace(password))
+                throw new AppException("Password is required");
+
+            CreatePasswordHash(password, out passwordHash, out passwordSalt);
+
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+
+            _context.tbl_user.Update(user);
+
+            if (!Save())
+            {
+                throw new AppException("Error in updating password.");
+            }
         }
 
         public bool Save()
