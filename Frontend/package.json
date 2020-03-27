@@ -6,13 +6,20 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "dev": "npm run serve"
+    "dev": "npm run serve",
+    "unit": "jest"
   },
   "dependencies": {
+    "@babel/runtime": "^7.9.2",
     "@ckeditor/ckeditor5-build-classic": "^16.0.0",
     "@ckeditor/ckeditor5-vue": "^1.0.1",
+    "@vue/babel-preset-app": "^4.2.3",
+    "@vue/test-utils": "^1.0.0-beta.32",
+    "babel-jest": "^25.2.3",
     "eslint-config-prettier": "^6.10.0",
     "install": "^0.13.0",
+    "jest": "^25.2.3",
+    "jest-transform-stub": "^2.0.0",
     "jquery": "^3.4.1",
     "js-cookie": "^2.2.1",
     "moment": "^2.24.0",
@@ -26,6 +33,7 @@
     "vue-axios": "^2.1.5",
     "vue-cookies": "^1.6.1",
     "vue-image-crop-upload": "^2.5.0",
+    "vue-jest": "^3.0.5",
     "vue-meta": "^1.5.2",
     "vue-tree-list": "^1.4.3",
     "vue-video-player": "^5.0.2",
@@ -39,6 +47,7 @@
     "@vue/eslint-config-standard": "^3.0.1",
     "axios": "^0.18.1",
     "babel-eslint": "^10.0.1",
+    "babel-core": "^7.0.0-bridge.0",
     "eslint": "^5.16.0",
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-vue": "^5.0.0",
@@ -50,7 +59,7 @@
     "vue-i18n": "^7.4.0",
     "vue-particles": "^1.0.9",
     "vue-router": "^3.0.1",
-    "vue-template-compiler": "^2.6.10",
+    "vue-template-compiler": "^2.6.11",
     "vuex": "^3.0.1",
     "vuex-router-sync": "^5.0.0"
   }
