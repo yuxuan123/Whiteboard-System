@@ -38,7 +38,7 @@ export default {
   // Without Params
   GETALLUSERS({ commit }, pagination) {
     return new Promise((resolve, reject) => {
-      axios.get(API_URL + '/getAllUsers', { params: { PageNumber: "0", PageSize: "100" }})
+      axios.get(API_URL + '/getAllUsers', { params: { PageNumber: "0", PageSize: "100" } })
         .then(response => {
           resolve(response)
         })
@@ -223,7 +223,7 @@ export default {
     })
   },
 
-  ADDCOURSESTAFF({ commit }, payload){
+  ADDCOURSESTAFF({ commit }, payload) {
     return new Promise((resolve, reject) => {
       axios.post(API_URL + "/addCourseStaff", [payload])
         .then(response => {
@@ -247,7 +247,7 @@ export default {
     })
   },
 
-  DELETECOURSE({commit}, courseId){
+  DELETECOURSE({ commit }, courseId) {
     return new Promise((resolve, reject) => {
       axios.delete(API_URL + '/deleteCourse/' + courseId)
         .then(response => {
@@ -259,7 +259,7 @@ export default {
     })
   },
 
-  DELETECONTENT({ commit }, contentId){
+  DELETECONTENT({ commit }, contentId) {
     return new Promise((resolve, reject) => {
       axios.delete(API_URL + '/deleteContent/' + contentId)
         .then(response => {
@@ -339,17 +339,24 @@ export default {
   },
   SETNEWPASSWORD({ commit }, payload) {
     return new Promise((resolve, reject) => {
-      resolve(true);
-    })
-  },
-  ACTIVATE({ commit }, email) {
-    return new Promise((resolve, reject) => {
-      resolve(true);
+      axios.post(API_URL + "/ResetPassword", { userId: payload.userId, newPassword: payload.newpassword })
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
   RESET({ commit }, email) {
     return new Promise((resolve, reject) => {
-      resolve(true);
+      axios.post(API_URL + "/ForgetPassword", { email: email })
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   },
 }

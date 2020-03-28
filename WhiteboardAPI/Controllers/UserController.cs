@@ -284,7 +284,7 @@ namespace WhiteboardAPI.Controllers
                 if (user == null)
                     return BadRequest(new { message = "Cannot find user. Please check the username." });
 
-                var userFromRepo = _mapper.Map<UserDto>(user);
+                //var userFromRepo = _mapper.Map<UserDto>(user);
 
 
                 string url = "http://localhost:8080/resetpassword/" + user.UserId;

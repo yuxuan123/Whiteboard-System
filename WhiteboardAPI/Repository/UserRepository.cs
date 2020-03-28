@@ -99,7 +99,7 @@ namespace WhiteboardAPI.Repository
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
                 return null;
 
-            var user = _context.tbl_user.SingleOrDefault(x => x.UserName.Equals(username, StringComparison.OrdinalIgnoreCase));
+            var user = _context.tbl_user.SingleOrDefault(x => x.UserName == username);
 
 
             if (user == null)
@@ -188,7 +188,7 @@ namespace WhiteboardAPI.Repository
 
         public UserDE GetUserByEmail(string email)
         {
-            return _context.tbl_user.Where(x => x.Email.Equals(email, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+            return _context.tbl_user.Where(x => x.Email == email).FirstOrDefault();
         }
 
         public void UpdatePassword(UserDE user, string password)
