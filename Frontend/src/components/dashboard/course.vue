@@ -56,11 +56,9 @@
                   <v-card-text>
                     <v-container class="pt-0" grid-list-md>
                       <v-layout wrap>
+
                         <v-flex xs12 sm12 md12>
-                          <v-text-field
-                            v-model="createMaterial.MaterialName"
-                            label="document Name"
-                          />
+                          <v-text-field v-model="createMaterial.MaterialName" label="document Name" />
                         </v-flex>
 
                         <v-flex xs12 sm12 md12>
@@ -104,7 +102,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import $ from "jquery";
 import { VueTreeList, Tree, TreeNode } from "vue-tree-list";
 export default {
@@ -117,7 +114,7 @@ export default {
       courses: [],
       courseContents: [],
       createContent: {},
-      createMaterial: {},
+      createMaterial:{},
       userId: "",
       userRole: "",
       dialog: false,
@@ -218,7 +215,7 @@ export default {
               " | " +
               this.courseContents[i].description +
               " | " +
-              this.courseContents[i].url+" | " );
+              this.courseContents[i].url);
           this.courseCodeTree.children[index].addChildren(nodeleaf);
         }
       }
@@ -262,37 +259,7 @@ export default {
     },
     addButton() {
       var body = document.getElementsByClassName("vtl-operation");
-      var contentBody = document.getElementsByClassName("vtl-node-content");
-      var stringURL;
-      var URL=[];
-      var leafNodeLocation=[];
-       for (var k = contentBody.length; k > 0; k--) {
-         var innHTML=contentBody[k-1].innerHTML.trim();
-      
-          var l=innHTML.length;
-          
-         if(innHTML.charAt(l-1)=="|"){
-          leafNodeLocation.push(k-1);
-           for(var j=l-2; j > 0; j--)
-           {
-            if(innHTML.charAt(j)!="|"){
-           if (j + 1 == l-2) {
-                stringURL = innHTML.charAt(j);
-              } else {
-                stringURL = innHTML.charAt(j) + stringURL;
-              }
-            } else {
-              URL.push(stringURL.trim());
-              break;
-            } 
-           }
-     
-            
-       }
-      
-       }
-
-      for (var i = 0; i < leafNodeLocation.length; i++) {
+      for (var i = 0; i < body.length; i++) {
         // 1. Create the button
         var button = document.createElement("button");
         button.setAttribute("id", "btn" + i);
@@ -300,49 +267,16 @@ export default {
         button.innerHTML = "Download";
         button.style.color = "#ffffff";
         button.style.float = "right";
-
         // 2. Append somewhere
-        $(body[leafNodeLocation[i]]).append(button);
+        $(body[i]).append(button);
       }
-      // // 3. Add event handler
+      // 3. Add event handler
       $(document).ready(function() {
-        for (var i = 0; i < leafNodeLocation.length; i++) {
+        for (var i = 0; i < body.length; i++) {
           var btnID = "#btn" + i;
-          var fileName;
-          // URL =
-           // "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
 
-          var fileTypeLength = 0;
-          var longStringURL= URL[i];
-          for (var v = longStringURL.length; v > 0; v--) {
-            if (longStringURL[v] != "/") {
-              if (v + 1 == longStringURL.length) {
-                fileName = longStringURL[v];
-              } else {
-                fileName = longStringURL[v] + fileName;
-              }
-            } else {
-              break;
-            }
-          }
-          // onclick to perform download
           $(btnID).click(function() {
-            axios({
-              url: longStringURL,
-              method: "GET",
-              responseType: "blob" // important
-            }).then(response => {
-              console.log(response);
-              var type = response.data.type;
-
-              const url = window.URL.createObjectURL(new Blob([response.data]));
-              const link = document.createElement("a");
-              link.href = url;
-
-              link.setAttribute("download", fileName);
-              document.body.appendChild(link);
-              link.click();
-            });
+            confirm("Do you want to download this?");
           });
         }
       });
@@ -378,7 +312,7 @@ export default {
       console.log(params.name);
     },
     addleafNode() {
-      let cur = this;
+      let cur= this;
       // var orgData = cur.courseCodeTree;
       // // first layer
       // for (var i = 0; i < orgData.children.length; i++) {
@@ -389,7 +323,7 @@ export default {
       //       orgData.children[i].children[k].id = 1;
       //       orgData.children[i].children[k].name = "hihihi";
       //       orgData.children[i].children[k].pid = "hihihi";
-
+            
       //       break;
       //     }
       //   }
