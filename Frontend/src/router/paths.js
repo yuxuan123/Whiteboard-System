@@ -25,7 +25,7 @@ export default [
       import(/* webpackChunkName: "routes" */ `@/components/error/NotFound.vue`)
   },
   {
-    path: '/reset/:userId',
+    path: '/resetpassword/:userId',
     component: () =>
       import(/* webpackChunkName: "routes" */ `@/components/auth/Reset.vue`)
   },

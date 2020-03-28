@@ -109,7 +109,7 @@ export default {
   created: function() {
     var route = this.$route.path.split("/");
     var url = route[1];
-    if (url === "reset") {
+    if (url === "resetpassword") {
       this.title = "Whiteboard | Reset Password";
       this.header = "Reset Password";
     } else if (url === "activate") {
@@ -119,7 +119,11 @@ export default {
   },
   methods: {
     changePassword() {
-      var userId = this.$route.params.userId;
+      var cur= this;
+       var stringURL= this.$route.params.userId;
+      stringURL = stringURL.replace("class=", "");
+      this.userId=stringURL.trim();
+      
       if (this.newpassword !== this.cfmpassword) {
         this.snackbar = true;
         this.color = "error";
@@ -127,8 +131,8 @@ export default {
       } else {
         this.$store
           .dispatch("SETNEWPASSWORD", {
-            newpassword: this.newpassword,
-            userid: userId
+            newpassword: cur.newpassword,
+            userid: this.userId
           })
           .then(success => {
             this.snackbar = true;

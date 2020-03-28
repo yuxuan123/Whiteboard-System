@@ -339,7 +339,22 @@ export default {
   },
   SETNEWPASSWORD({ commit }, payload) {
     return new Promise((resolve, reject) => {
-      axios.post(API_URL + "/ResetPassword", { userId: payload.userId, newPassword: payload.newpassword })
+      axios.post(API_URL + "/ResetPassword", { userId: payload.userid, newPassword: payload.newpassword },{
+        headers: {
+            'Content-Type': 'application/json',
+        }})
+        .then(response => {
+          resolve(response)
+        })
+        .catch(err => {
+          reject(err)
+        
+        })
+    })
+  },
+  RESET({ commit }, email) {
+    return new Promise((resolve, reject) => {
+      axios.post(API_URL + "/ForgetPassword?email="+ email )
         .then(response => {
           resolve(response)
         })
@@ -348,13 +363,19 @@ export default {
         })
     })
   },
-  RESET({ commit }, email) {
+  CREATECONTENT({ commit }, content) {
     return new Promise((resolve, reject) => {
-      axios.post(API_URL + "/ForgetPassword", { email: email })
+      axios.post(API_URL + '/createContent', content,{
+        headers: {
+            'Content-Type': 'application/json',
+           'Access-Control-Allow-Methods': 'GET, POST, PUT',
+            'Access-Control-Allow-Origin': '*',
+        }})
         .then(response => {
           resolve(response)
         })
         .catch(err => {
+         
           reject(err)
         })
     })
