@@ -98,7 +98,7 @@
                         <v-flex xs12 sm12 md12>
                           <v-text-field
                             v-model="createMaterial.description"
-                            label="document Description"
+                            label="Description"
                           />
                         </v-flex>
                       </v-layout>
@@ -444,6 +444,7 @@ export default {
           if (cur.nodeID == orgData.children[i].children[k].id) {
             //attempting to create content
             var content = {
+              contentId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
               courseId: orgData.children[i].id,
               Type: cur.createMaterial.type,
               Title: cur.createMaterial.title,
@@ -483,7 +484,7 @@ export default {
         // entire view has been rendered
         // 1. Create the button
         var button = document.createElement("button");
-        button.setAttribute("id", orgData.children[i].id);
+        //button.setAttribute("id", orgData.children[i].id);
         button.setAttribute("class", "general");
         button.innerHTML = "Download";
         button.style.color = "#ffffff";

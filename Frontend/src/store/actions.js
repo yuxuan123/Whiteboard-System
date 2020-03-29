@@ -69,7 +69,7 @@ export default {
 
   CREATEUSER({ commit }, user) {
     //Hardcode Password
-    //user.password = "user1234!";
+    user.password = "Password123";
     return new Promise((resolve, reject) => {
       axios.post(API_URL + '/createUser', user)
         .then(response => {
@@ -339,22 +339,23 @@ export default {
   },
   SETNEWPASSWORD({ commit }, payload) {
     return new Promise((resolve, reject) => {
-      axios.post(API_URL + "/ResetPassword", { userId: payload.userid, newPassword: payload.newpassword },{
+      axios.post(API_URL + "/ResetPassword", { userId: payload.userid, newPassword: payload.newpassword }, {
         headers: {
-            'Content-Type': 'application/json',
-        }})
+          'Content-Type': 'application/json',
+        }
+      })
         .then(response => {
           resolve(response)
         })
         .catch(err => {
           reject(err)
-        
+
         })
     })
   },
   RESET({ commit }, email) {
     return new Promise((resolve, reject) => {
-      axios.post(API_URL + "/ForgetPassword?email="+ email )
+      axios.post(API_URL + "/ForgetPassword", { email: email })
         .then(response => {
           resolve(response)
         })
@@ -365,17 +366,11 @@ export default {
   },
   CREATECONTENT({ commit }, content) {
     return new Promise((resolve, reject) => {
-      axios.post(API_URL + '/createContent', content,{
-        headers: {
-            'Content-Type': 'application/json',
-           'Access-Control-Allow-Methods': 'GET, POST, PUT',
-            'Access-Control-Allow-Origin': '*',
-        }})
+      axios.post(API_URL + '/createContent', content)
         .then(response => {
           resolve(response)
         })
         .catch(err => {
-         
           reject(err)
         })
     })

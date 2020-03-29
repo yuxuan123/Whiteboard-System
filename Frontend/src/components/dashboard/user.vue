@@ -343,7 +343,22 @@ export default {
     emailUser(user) {
       var answer = window.confirm("Send activation email?");
       if (answer) {
-        //Send Activation Email
+        this.$store
+          .dispatch("RESET", user.email)
+          .then(response => {
+            this.snackbar = true;
+            this.color = "success";
+            this.message =
+              "Email sent to " + user.email + ". Please check your email";
+            this.email = "";
+          })
+          .catch(err => {
+            console.log(err);
+            this.snackbar = true;
+            this.color = "error";
+            this.message =
+              "Email not sent to the address. Please try again later";
+          });
       }
     },
 
