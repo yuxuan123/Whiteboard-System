@@ -4,13 +4,17 @@
       <v-flex xs12>
         <material-card color="general">
           <div slot="header">
-            <div class="title font-weight-light mb-2">Courses</div>
+            <div class="title font-weight-light mb-2">
+              Courses
+            </div>
           </div>
           <v-flex md12 sm12>
             <div>
               <v-snackbar v-model="snackbar" :color="color" :top="true">
                 {{ messages }}
-                <v-btn dark flat @click="snackbar = false">Close</v-btn>
+                <v-btn dark flat @click="snackbar = false">
+                  Close
+                </v-btn>
               </v-snackbar>
               <v-dialog v-model="dialog" width="600px">
                 <template v-slot:activator="{ on }">
@@ -20,7 +24,9 @@
                     dark
                     class="general"
                     v-on="on"
-                  >Add Course</v-btn>
+                  >
+                    Add Course
+                  </v-btn>
                 </template>
                 <v-card>
                   <v-card-title>
@@ -30,11 +36,17 @@
                     <v-container class="pt-0" grid-list-md>
                       <v-layout wrap>
                         <v-flex xs12 sm6 md6>
-                          <v-text-field v-model="createContent.CourseCode" label="Course Code" />
+                          <v-text-field
+                            v-model="createContent.CourseCode"
+                            label="Course Code"
+                          />
                         </v-flex>
 
                         <v-flex xs12 sm6 md6>
-                          <v-text-field v-model="createContent.CourseName" label="Course Name" />
+                          <v-text-field
+                            v-model="createContent.CourseName"
+                            label="Course Name"
+                          />
                         </v-flex>
 
                         <v-flex xs12 sm12 md12>
@@ -48,20 +60,27 @@
                   </v-card-text>
                   <v-card-actions>
                     <v-spacer />
-                    <v-btn class="general" rounded dark @click="addCourse">Create</v-btn>
+                    <v-btn class="general" rounded dark @click="addCourse">
+                      Create
+                    </v-btn>
                   </v-card-actions>
                 </v-card>
               </v-dialog>
 
               <v-dialog v-model="dialogleafNode" width="800px">
                 <v-card>
-                  <v-card-title class="headline">Create document</v-card-title>
+                  <v-card-title class="headline">
+                    Create document
+                  </v-card-title>
 
                   <v-card-text>
                     <v-container class="pt-0" grid-list-md>
                       <v-layout wrap>
                         <v-flex xs12 sm12 md12>
-                          <v-text-field v-model="createMaterial.title" label="Title" />
+                          <v-text-field
+                            v-model="createMaterial.title"
+                            label="Title"
+                          />
                         </v-flex>
                         <v-flex xs12 sm12 md12>
                           <v-text-field
@@ -70,7 +89,10 @@
                           />
                         </v-flex>
                         <v-flex xs12 sm12 md12>
-                          <v-text-field v-model="createMaterial.Url" label="URL" />
+                          <v-text-field
+                            v-model="createMaterial.Url"
+                            label="URL"
+                          />
                         </v-flex>
 
                         <v-flex xs12 sm12 md12>
@@ -84,9 +106,11 @@
                   </v-card-text>
 
                   <v-card-actions>
-                    <v-spacer></v-spacer>
+                    <v-spacer />
 
-                    <v-btn class="general" rounded dark @click="addleafNode">Create</v-btn>
+                    <v-btn class="general" rounded dark @click="addleafNode">
+                      Create
+                    </v-btn>
                   </v-card-actions>
                 </v-card>
               </v-dialog>
@@ -309,7 +333,7 @@ export default {
         // 1. Create the button
         var button = document.createElement("button");
         button.setAttribute("id", "btn" + i);
-        button.setAttribute("class", "general");
+        button.setAttribute("class", "general downloadBtn");
         button.innerHTML = "Download";
         button.style.color = "#ffffff";
         button.style.float = "right";
@@ -395,7 +419,7 @@ export default {
     onAddNode(params) {
       this.dialogleafNode = true;
       this.nodeID = params.id;
-      console.log(params.name);
+      //console.log(params.name);
     },
     addleafNode() {
       let cur = this;
@@ -420,7 +444,6 @@ export default {
           if (cur.nodeID == orgData.children[i].children[k].id) {
             //attempting to create content
             var content = {
-              contentId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
               courseId: orgData.children[i].id,
               Type: cur.createMaterial.type,
               Title: cur.createMaterial.title,
@@ -531,47 +554,41 @@ export default {
     },
 
     onChangeName(params) {
-      var title="1";
-      var description="1";
-      var url="1";
+      var title = "1";
+      var description = "1";
+      var url = "1";
       var count = 1;
 
       for (var p = 0; p < params.newName.length; p++) {
         if (params.newName.charAt(p) != "|") {
           if (count == 1) {
-            if (title=="1") {
+            if (title == "1") {
               title = params.newName.charAt(p);
             } else {
               title = title + params.newName.charAt(p);
             }
-          }
-          else if(count == 2)
-          {
-            if (description=="1") {
+          } else if (count == 2) {
+            if (description == "1") {
               description = params.newName.charAt(p);
             } else {
               description = description + params.newName.charAt(p);
             }
-
-          }
-          else if(count == 3)
-          {
-            if (url=="1") {
+          } else if (count == 3) {
+            if (url == "1") {
               url = params.newName.charAt(p);
             } else {
               url = url + params.newName.charAt(p);
             }
-
           }
         } else if (params.newName.charAt(p) == "|") {
           count++;
         }
       }
-      title=title.trim();
-      description=description.trim();
-      url= url.trim();
-    
-       console.log(description);
+      title = title.trim();
+      description = description.trim();
+      url = url.trim();
+
+      //console.log(description);
       var myObj = {
         contentId: params.id,
         courseId: params.id,
@@ -584,10 +601,10 @@ export default {
         createdOn: "0001-01-01T00:00:00Z",
         createdBy: this.userId //"d99dfc08-5d7a-4e04-c824-08d7c5959f4d"
       };
-      this.axios
-        .put("https://whiteboardsyetem.azurewebsites.net/updateContent", myObj)
-        .then(function(response) {});
-      console.log(params);
+      this.axios.put(
+        "https://whiteboardsyetem.azurewebsites.net/updateContent",
+        myObj
+      );
     }
   }
 };
@@ -610,16 +627,16 @@ export default {
   padding: 10px !important;
   font-size: 18px !important;
 }
-button {
+.downloadBtn {
   margin-left: 10px;
-  line-height: 60px;
+  line-height: 40px;
   font-weight: bold;
-  padding: 0 40px;
+  padding: 0 20px;
   background: #337ab7;
   border: #2e6da4;
-  border-radius: 1px;
+  border-radius: 25px;
 }
-button:hover {
+.downloadBtn:hover {
   color: #fff;
   background: #337ab7;
   border-radius: 25px;
