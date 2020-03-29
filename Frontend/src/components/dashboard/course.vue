@@ -8,6 +8,10 @@
           </div>
           <v-flex md12 sm12>
             <div>
+              <v-snackbar v-model="snackbar" :color="color" :top="true">
+                {{ messages }}
+                <v-btn dark flat @click="snackbar = false">Close</v-btn>
+              </v-snackbar>
               <v-dialog v-model="dialog" width="600px">
                 <template v-slot:activator="{ on }">
                   <v-btn
@@ -128,7 +132,10 @@ export default {
       userRole: "",
       dialog: false,
       dialogleafNode: false,
-      nodeID: ""
+      nodeID: "",
+      snackbar: false,
+      color: "general",
+      messages: ""
     };
   },
   created() {
@@ -185,7 +192,8 @@ export default {
             //Set Default config for student
             isLeaf: false,
             dragDisabled: true,
-            addTreeNodeDisabled: true
+            addTreeNodeDisabled: true,
+            editNodeDisabled: true
           });
         }
         node.id = this.courses[i].courseId;
@@ -274,6 +282,7 @@ export default {
       var stringURL;
       var URL = [];
       var leafNodeLocation = [];
+      let cur = this;
       for (var k = contentBody.length; k > 0; k--) {
         var innHTML = contentBody[k - 1].innerHTML.trim();
 
@@ -335,16 +344,25 @@ export default {
               url: longStringURL,
               method: "GET",
               responseType: "blob" // important
-            }).then(response => {
-              var type = response.data.type;
-              const url = window.URL.createObjectURL(new Blob([response.data]));
-              const link = document.createElement("a");
-              link.href = url;
+            })
+              .then(response => {
+                var type = response.data.type;
+                const url = window.URL.createObjectURL(
+                  new Blob([response.data])
+                );
+                const link = document.createElement("a");
+                link.href = url;
 
-              link.setAttribute("download", fileName);
-              document.body.appendChild(link);
-              link.click();
-            });
+                link.setAttribute("download", fileName);
+                document.body.appendChild(link);
+                link.click();
+              })
+              .catch(err => {
+                cur.snackbar = true;
+                cur.color = "error";
+                cur.messages = "Sorry cannot download this content!";
+                //reject(err);
+              });
           });
         }
       });
@@ -383,9 +401,13 @@ export default {
       let cur = this;
       var dobreak = false;
       var orgData = cur.courseCodeTree;
+      var dataID;
+      var URL;
 
       var locationbtn = 0;
+      var leafNodeLocation = 0;
 
+      //loop through the tree to modify the leaf node content after the creation of content via the api
       // first layer
       for (var i = 0; !dobreak && i < orgData.children.length; i++) {
         // second layer
@@ -396,32 +418,43 @@ export default {
           k++
         ) {
           if (cur.nodeID == orgData.children[i].children[k].id) {
+            //attempting to create content
+            var content = {
+              contentId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              courseId: orgData.children[i].id,
+              Type: cur.createMaterial.type,
+              Title: cur.createMaterial.title,
+              Description: cur.createMaterial.description,
+              Datetime: "0001-01-01T00:00:00Z",
+              FileName: "null",
+              Url: cur.createMaterial.Url,
+              CreatedOn: "0001-01-01T00:00:00Z",
+              CreatedBy: cur.userId
+            };
+            this.$store.dispatch("CREATECONTENT", content).then(response => {
+              //console.log(response.data.contentId);
+
+              dataID = response.data.contentId;
+              URL = response.data.url;
+            });
             //edit the data from tree
-            // var content = {
-            //   contentId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            //   courseId: orgData.children[i].id,
-            //   Type: cur.createMaterial.type,
-            //   Title: cur.createMaterial.title,
-            //   Description: cur.createMaterial.description,
-            //   Datetime: "0001-01-01T00:00:00Z",
-            //   FileName: "null",
-            //   Url: cur.createMaterial.Url,
-            //   CreatedOn: "0001-01-01T00:00:00Z",
-            //   CreatedBy: cur.userId
-            // };
-            // // console.log(orgData.children[i].id);
-            // this.$store.dispatch("CREATECONTENT", content).then(response => {});
-
-            orgData.children[i].children[k].id = 9;
-            orgData.children[i].children[k].name = cur.createMaterial.title+" | "+
-            cur.createMaterial.description+" | "+cur.createMaterial.Url+" | ";
-
+            orgData.children[i].children[k].id = dataID;
+            orgData.children[i].children[k].name =
+              cur.createMaterial.title +
+              " | " +
+              cur.createMaterial.description +
+              " | " +
+              cur.createMaterial.Url +
+              " | ";
             dobreak = true;
             break;
           }
+          leafNodeLocation++;
+          locationbtn++;
         }
         locationbtn++;
       }
+      //adding button after the tree data is updated
       setTimeout(function() {
         // Code that will run only after the
         // entire view has been rendered
@@ -439,8 +472,9 @@ export default {
         $(document).ready(function() {
           var btnID = "#" + orgData.children[i].id;
           var fileName;
-          var URL =
-            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+          // var URL =cur.createMaterial.Url;
+          //console.log(cur.createMaterial.Url);
+          // "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
 
           for (var v = URL.length; v > 0; v--) {
             if (URL[v] != "/") {
@@ -459,19 +493,31 @@ export default {
               url: URL,
               method: "GET",
               responseType: "blob" // important
-            }).then(response => {
-              var type = response.data.type;
-              const url = window.URL.createObjectURL(new Blob([response.data]));
-              const link = document.createElement("a");
-              link.href = url;
+            })
+              .then(response => {
+                var type = response.data.type;
+                const url = window.URL.createObjectURL(
+                  new Blob([response.data])
+                );
+                const link = document.createElement("a");
+                link.href = url;
 
-              link.setAttribute("download", fileName);
-              document.body.appendChild(link);
-              link.click();
-            });
+                link.setAttribute("download", fileName);
+                document.body.appendChild(link);
+                link.click();
+              })
+              .catch(err => {
+                cur.snackbar = true;
+                cur.color = "error";
+                cur.messages = "Sorry cannot download this content!";
+                //  reject(err);
+              });
           });
         });
-      }, 1000);
+        var Divbody = document.getElementsByClassName("vtl-node vtl-leaf-node");
+
+        Divbody[leafNodeLocation].setAttribute("id", dataID);
+      }, 1500);
 
       cur.createMaterial = {};
       cur.nodeID = "";
@@ -485,17 +531,58 @@ export default {
     },
 
     onChangeName(params) {
+      var title="1";
+      var description="1";
+      var url="1";
+      var count = 1;
+
+      for (var p = 0; p < params.newName.length; p++) {
+        if (params.newName.charAt(p) != "|") {
+          if (count == 1) {
+            if (title=="1") {
+              title = params.newName.charAt(p);
+            } else {
+              title = title + params.newName.charAt(p);
+            }
+          }
+          else if(count == 2)
+          {
+            if (description=="1") {
+              description = params.newName.charAt(p);
+            } else {
+              description = description + params.newName.charAt(p);
+            }
+
+          }
+          else if(count == 3)
+          {
+            if (url=="1") {
+              url = params.newName.charAt(p);
+            } else {
+              url = url + params.newName.charAt(p);
+            }
+
+          }
+        } else if (params.newName.charAt(p) == "|") {
+          count++;
+        }
+      }
+      title=title.trim();
+      description=description.trim();
+      url= url.trim();
+    
+       console.log(description);
       var myObj = {
         contentId: params.id,
         courseId: params.id,
         type: "null",
-        title: params.newName,
-        description: "null",
+        title: title,
+        description: description,
         datetime: "0001-01-01T00:00:00Z",
-        fileName: params.newName + ".doc",
-        url: params.newName + ".doc",
+        fileName: url,
+        url: url,
         createdOn: "0001-01-01T00:00:00Z",
-        createdBy: userId //"d99dfc08-5d7a-4e04-c824-08d7c5959f4d"
+        createdBy: this.userId //"d99dfc08-5d7a-4e04-c824-08d7c5959f4d"
       };
       this.axios
         .put("https://whiteboardsyetem.azurewebsites.net/updateContent", myObj)
