@@ -51,9 +51,7 @@
       <p>Come back sometime later? :)</p>
       <div class="buttons-con">
         <div class="action-link-wrap">
-          <a href="/" class="link-button"
-            >Go to Home Page</a
-          >
+          <a href="/" class="link-button">Go to Home Page</a>
         </div>
       </div>
     </div>

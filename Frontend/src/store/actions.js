@@ -355,7 +355,7 @@ export default {
   },
   RESET({ commit }, email) {
     return new Promise((resolve, reject) => {
-      axios.post(API_URL + "/ForgetPassword", { email: email })
+      axios.post(API_URL + "/ForgetPassword?email=" + email)
         .then(response => {
           resolve(response)
         })

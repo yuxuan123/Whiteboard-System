@@ -498,7 +498,7 @@ export default {
           this.DiscussionList = response.data;
           //Make the datetime more readable
           for (var i = 0; i < this.DiscussionList.length; i++) {
-            this.DiscussionList[i].createdOn = moment(
+            this.DiscussionList[i].createdOn = moment.utc(
               this.DiscussionList[i].createdOn
             ).format("DD/MM/YY HH:mm:ss");
             if (

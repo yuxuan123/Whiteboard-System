@@ -88,7 +88,7 @@
 
                 <v-list-tile-action>
                   <v-list-tile-action-text>
-                    {{ moment(item.createdOn).fromNow() }}
+                    {{ moment.utc(item.createdOn).fromNow() }}
                   </v-list-tile-action-text>
                 </v-list-tile-action>
               </v-list-tile>
@@ -380,7 +380,7 @@
                               color="blue"
                               class="white--text"
                             >
-                              {{ moment(item.createdOn).fromNow() }}
+                              {{ moment.utc(item.createdOn).fromNow() }}
                             </v-chip>
                             <v-btn
                               icon
